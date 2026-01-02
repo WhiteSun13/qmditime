@@ -67,7 +67,7 @@ HOLIDAYS = {
         (2, 3): {"name": "Бераат геджеси", "type": "night", "night": True},
         (2, 19): {"name": "Рамазан айынынъ башланувы", "type": "start", "night": False},
         (3, 17): {"name": "Къадир геджеси", "type": "night", "night": True},
-        (1, 19): {"name": "Ораза байрамынынъ арефеси", "type": "eve", "night": False},
+        (3, 19): {"name": "Ораза байрамынынъ арефеси", "type": "eve", "night": False},
         (3, 20): {"name": "Ораза байрамы", "type": "holiday", "night": False},
         (3, 21): {"name": "Ораза байрамы", "type": "holiday", "night": False},
         (3, 22): {"name": "Ораза байрамы", "type": "holiday", "night": False},
