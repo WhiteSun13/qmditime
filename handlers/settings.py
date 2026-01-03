@@ -243,7 +243,7 @@ async def manual_offset(callback: CallbackQuery, state: FSMContext):
         "✏️ Введите поправку в минутах:\n\n"
         "Примеры: 5, -10, +15\n\n"
         "• <b>Положительное число</b> (+5) — намаз наступает позже\n"
-        "• <b>Отрицательное число</b> (-5) — намаз наступает раньше\n\n"
+        "• <b>Отрицательное число</b> (-5) — намаз наступает раньше\n\n",
         parse_mode="HTML"
     )
     await state.set_state(SettingsStates.waiting_custom_offset)
