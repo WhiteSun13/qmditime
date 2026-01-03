@@ -150,8 +150,8 @@ class PrayerScheduler:
         prayer_name = prayer_names[prayer_key]
         
         text = (
-            f"🔔 <b>Напоминание</b>\n\n"
-            f"Через <b>{minutes_before} минут</b> наступит время\n"
+            f"🔔 <b>Скоро намаз!</b>\n\n"
+            f"Через <b>{minutes_before} мин.</b> наступит:\n"
             f"{prayer_name} — <b>{prayer_time}</b>"
         )
         

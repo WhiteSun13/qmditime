@@ -74,22 +74,22 @@ def settings_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     
     builder.row(
-        InlineKeyboardButton(text="⏰ Авто-расписание", callback_data="settings_auto")
+        InlineKeyboardButton(text="⏰ Ежедневная рассылка", callback_data="settings_auto")
     )
     builder.row(
-        InlineKeyboardButton(text="⏱ Смещение времени", callback_data="settings_offset")
+        InlineKeyboardButton(text="⏱ Коррекция времени", callback_data="settings_offset")
     )
     builder.row(
-        InlineKeyboardButton(text="📆 День расписания", callback_data="settings_day")
+        InlineKeyboardButton(text="📆 Какой день присылать", callback_data="settings_day")
     )
     builder.row(
-        InlineKeyboardButton(text="🔤 Названия намазов", callback_data="settings_prayer_names")
+        InlineKeyboardButton(text="🔤 Язык названий", callback_data="settings_prayer_names")
     )
     builder.row(
-        InlineKeyboardButton(text="📅 Настройки хиджри", callback_data="settings_hijri")
+        InlineKeyboardButton(text="📅 Дата по Хиджре", callback_data="settings_hijri")
     )
     builder.row(
-        InlineKeyboardButton(text="📍 Настройки локации", callback_data="settings_location")
+        InlineKeyboardButton(text="📍 Мой город", callback_data="settings_location")
     )
     builder.row(
         InlineKeyboardButton(text="🎉 Праздники", callback_data="settings_holidays")

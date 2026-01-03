@@ -48,12 +48,12 @@ async def show_settings_message(message: Message):
     
     text = (
         "⚙️ <b>Настройки</b>\n\n"
-        f"📍 Локация: <b>{location}</b> {'(скрыта)' if not show_location else ''}\n"
-        f"⏰ Авто-расписание: <b>{auto_text}</b>\n"
-        f"⏱ Смещение: <b>{offset:+d} мин</b>\n"
-        f"📆 День: <b>{day_text}</b>\n"
-        f"🔤 Названия: <b>{style_names.get(style, 'Стандартные')}</b>\n"
-        f"🗓 Хиджри: <b>{'да' if show_hijri else 'нет'}</b>\n"
+        f"📍 Город: <b>{location}</b> {'(скрыт)' if not show_location else ''}\n"
+        f"⏰ Рассылка: <b>{auto_text}</b>\n"
+        f"⏱ Коррекция времени: <b>{offset:+d} мин</b>\n"
+        f"📆 В рассылке: <b>{day_text}</b>\n"
+        f"🔤 Язык: <b>{style_names.get(style, 'Стандартные')}</b>\n"
+        f"🗓 Дата по Хиджре: <b>{'включена' if show_hijri else 'выключена'}</b>\n"
     )
     
     await message.answer(text, reply_markup=settings_keyboard(), parse_mode="HTML")
@@ -83,12 +83,12 @@ async def show_settings(callback: CallbackQuery):
     
     text = (
         "⚙️ <b>Настройки</b>\n\n"
-        f"📍 Локация: <b>{location}</b> {'(скрыта)' if not show_location else ''}\n"
-        f"⏰ Авто-расписание: <b>{auto_text}</b>\n"
-        f"⏱ Смещение: <b>{offset:+d} мин</b>\n"
-        f"📆 День: <b>{day_text}</b>\n"
-        f"🔤 Названия: <b>{style_names.get(style, 'Стандартные')}</b>\n"
-        f"🗓 Хиджри: <b>{'да' if show_hijri else 'нет'}</b>\n"
+        f"📍 Город: <b>{location}</b> {'(скрыт)' if not show_location else ''}\n"
+        f"⏰ Рассылка: <b>{auto_text}</b>\n"
+        f"⏱ Коррекция времени: <b>{offset:+d} мин</b>\n"
+        f"📆 В рассылке: <b>{day_text}</b>\n"
+        f"🔤 Язык: <b>{style_names.get(style, 'Стандартные')}</b>\n"
+        f"🗓 Дата по Хиджре: <b>{'включена' if show_hijri else 'выключена'}</b>\n"
     )
     
     await callback.message.edit_text(
@@ -240,10 +240,10 @@ async def process_location_name(message: Message, state: FSMContext):
 async def manual_offset(callback: CallbackQuery, state: FSMContext):
     """Ручной ввод смещения"""
     await callback.message.edit_text(
-        "✏️ Введите смещение в минутах:\n\n"
-        "Например: 5, -10, +15\n\n"
-        "Положительное значение - время позже\n"
-        "Отрицательное значение - время раньше",
+        "✏️ Введите поправку в минутах:\n\n"
+        "Примеры: 5, -10, +15\n\n"
+        "• <b>Положительное число</b> (+5) — намаз наступает позже\n"
+        "• <b>Отрицательное число</b> (-5) — намаз наступает раньше\n\n"
         parse_mode="HTML"
     )
     await state.set_state(SettingsStates.waiting_custom_offset)
@@ -319,8 +319,8 @@ async def settings_auto(callback: CallbackQuery):
     current_time = settings.get('daily_schedule_time') if settings else None
     
     text = (
-        "⏰ <b>Авто-расписание</b>\n\n"
-        "Выберите время для ежедневной отправки расписания.\n\n"
+        "⏰ <b>Ежедневная рассылка</b>\n\n"
+        "Во сколько присылать расписание на день?\n\n"
         f"Текущее время: <b>{current_time or 'не установлено'}</b>"
     )
     
@@ -349,10 +349,10 @@ async def set_auto_time(callback: CallbackQuery, state: FSMContext):
     
     if time_value == "off":
         await save_chat_settings(callback.message.chat.id, daily_schedule_time=None)
-        await callback.answer("✅ Авто-расписание отключено")
+        await callback.answer("✅ Ежедневная рассылка отключена")
     else:
         await save_chat_settings(callback.message.chat.id, daily_schedule_time=time_value)
-        await callback.answer(f"✅ Время установлено: {time_value}")
+        await callback.answer(f"✅ Ежедневная рассылка установлена: {time_value}")
     
     await settings_auto(callback)
 
