@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from config import PRAYER_NAMES_STYLES, PRAYER_KEYS
+from config import PRAYER_NAMES_STYLES, PRAYER_KEYS, LOCATIONS
 
 
 def get_prayer_names(style: str = "standard"):
@@ -10,7 +10,9 @@ def get_prayer_names(style: str = "standard"):
 def main_menu_keyboard() -> InlineKeyboardMarkup:
     """Главное меню"""
     builder = InlineKeyboardBuilder()
-    
+    builder.row(
+        InlineKeyboardButton(text="⏰ Ежедневная рассылка", callback_data="settings_auto")
+    )
     builder.row(
         InlineKeyboardButton(text="📅 Расписание", callback_data="schedule"),
         InlineKeyboardButton(text="⚙️ Настройки", callback_data="settings")
@@ -70,18 +72,9 @@ def date_navigation_keyboard(current_date: str) -> InlineKeyboardMarkup:
 
 
 def settings_keyboard() -> InlineKeyboardMarkup:
-    """Меню настроек"""
+    """Меню настроек (без локации и смещения времени)"""
     builder = InlineKeyboardBuilder()
     
-    builder.row(
-        InlineKeyboardButton(text="⏰ Ежедневная рассылка", callback_data="settings_auto")
-    )
-    builder.row(
-        InlineKeyboardButton(text="⏱ Коррекция времени", callback_data="settings_offset")
-    )
-    builder.row(
-        InlineKeyboardButton(text="📆 Какой день присылать", callback_data="settings_day")
-    )
     builder.row(
         InlineKeyboardButton(text="🔤 Язык названий", callback_data="settings_prayer_names")
     )
@@ -89,13 +82,7 @@ def settings_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="📅 Дата по Хиджре", callback_data="settings_hijri")
     )
     builder.row(
-        InlineKeyboardButton(text="📍 Мой город", callback_data="settings_location")
-    )
-    builder.row(
         InlineKeyboardButton(text="🎉 Праздники", callback_data="settings_holidays")
-    )
-    builder.row(
-        InlineKeyboardButton(text="🔔 Напоминания", callback_data="reminders")
     )
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
@@ -134,13 +121,11 @@ def hijri_settings_keyboard(show_hijri: bool = True, style: str = "cyrillic") ->
     """Настройки хиджри"""
     builder = InlineKeyboardBuilder()
     
-    # Показывать/скрывать
     show_text = "✅ Показывать хиджри" if show_hijri else "⬜ Показывать хиджри"
     builder.row(
         InlineKeyboardButton(text=show_text, callback_data="toggle_hijri")
     )
     
-    # Стиль месяцев
     builder.row(
         InlineKeyboardButton(
             text=f"{'✅' if style == 'cyrillic' else '⬜'} Кириллица",
@@ -150,35 +135,6 @@ def hijri_settings_keyboard(show_hijri: bool = True, style: str = "cyrillic") ->
             text=f"{'✅' if style == 'latin' else '⬜'} Латиница",
             callback_data="set_hijri_style_latin"
         )
-    )
-    
-    builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
-    )
-    
-    return builder.as_markup()
-
-
-def location_settings_keyboard(show_location: bool = True) -> InlineKeyboardMarkup:
-    """Настройки локации"""
-    builder = InlineKeyboardBuilder()
-    
-    # Показывать/скрывать
-    show_text = "✅ Показывать в расписании" if show_location else "⬜ Показывать в расписании"
-    builder.row(
-        InlineKeyboardButton(text=show_text, callback_data="toggle_location_display")
-    )
-    
-    builder.row(
-        InlineKeyboardButton(text="📝 Изменить название", callback_data="edit_location_name")
-    )
-    
-    builder.row(
-        InlineKeyboardButton(text="🏙 Выбрать город", callback_data="location")
-    )
-    
-    builder.row(
-        InlineKeyboardButton(text="⏱ Ручной ввод смещения", callback_data="manual_offset")
     )
     
     builder.row(
@@ -228,84 +184,13 @@ def auto_schedule_keyboard(current_time: str = None) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="✏️ Своё время", callback_data="set_auto_time_custom")
     )
     builder.row(
+        InlineKeyboardButton(text="📆 Какой день присылать", callback_data="settings_day")
+    )
+    builder.row(
         InlineKeyboardButton(text="❌ Отключить", callback_data="set_auto_time_off")
     )
     builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
-    )
-    
-    return builder.as_markup()
-
-
-def offset_keyboard(current_offset: int = 0) -> InlineKeyboardMarkup:
-    """Настройка смещения времени"""
-    builder = InlineKeyboardBuilder()
-    
-    builder.row(
-        InlineKeyboardButton(text="-30", callback_data="offset_-30"),
-        InlineKeyboardButton(text="-15", callback_data="offset_-15"),
-        InlineKeyboardButton(text="-5", callback_data="offset_-5"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="+5", callback_data="offset_+5"),
-        InlineKeyboardButton(text="+15", callback_data="offset_+15"),
-        InlineKeyboardButton(text="+30", callback_data="offset_+30"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="✏️ Ввести вручную", callback_data="manual_offset")
-    )
-    builder.row(
-        InlineKeyboardButton(text="🔄 Сбросить (0)", callback_data="offset_reset")
-    )
-    builder.row(
-        InlineKeyboardButton(text="⚙️ По намазам", callback_data="offset_per_prayer")
-    )
-    builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
-    )
-    
-    return builder.as_markup()
-
-
-def prayer_offset_keyboard(prayer_names_style: str = "standard") -> InlineKeyboardMarkup:
-    """Выбор намаза для индивидуального смещения"""
-    builder = InlineKeyboardBuilder()
-    prayer_names = get_prayer_names(prayer_names_style)
-    
-    for prayer_key in PRAYER_KEYS:
-        builder.row(
-            InlineKeyboardButton(
-                text=prayer_names[prayer_key],
-                callback_data=f"prayer_offset_{prayer_key}"
-            )
-        )
-    
-    builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="settings_offset")
-    )
-    
-    return builder.as_markup()
-
-
-def prayer_offset_value_keyboard(prayer_key: str, current_offset: int = 0) -> InlineKeyboardMarkup:
-    """Установка смещения для конкретного намаза"""
-    builder = InlineKeyboardBuilder()
-    
-    builder.row(
-        InlineKeyboardButton(text="-15", callback_data=f"set_prayer_offset_{prayer_key}_-15"),
-        InlineKeyboardButton(text="-5", callback_data=f"set_prayer_offset_{prayer_key}_-5"),
-        InlineKeyboardButton(text="-1", callback_data=f"set_prayer_offset_{prayer_key}_-1"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="+1", callback_data=f"set_prayer_offset_{prayer_key}_+1"),
-        InlineKeyboardButton(text="+5", callback_data=f"set_prayer_offset_{prayer_key}_+5"),
-        InlineKeyboardButton(text="+15", callback_data=f"set_prayer_offset_{prayer_key}_+15"),
-    )
-    builder.row(
-        InlineKeyboardButton(text="🔄 Сбросить", callback_data=f"set_prayer_offset_{prayer_key}_0")
-    )
-    builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="offset_per_prayer")
+        InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
     )
     
     return builder.as_markup()
@@ -326,7 +211,7 @@ def schedule_day_keyboard(current: str = "today") -> InlineKeyboardMarkup:
         )
     )
     builder.row(
-        InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
+        InlineKeyboardButton(text="◀️ Назад", callback_data="settings_auto")
     )
     
     return builder.as_markup()
@@ -384,46 +269,76 @@ def reminder_time_keyboard(prayer_key: str) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def location_keyboard() -> InlineKeyboardMarkup:
-    """Выбор локации"""
+def location_keyboard(current_location: str = "", show_location: bool = True) -> InlineKeyboardMarkup:
+    """Выбор локации из главного меню"""
     builder = InlineKeyboardBuilder()
     
-    locations = [
-        ("Акъмесджит (Симферополь)", 0),
-        ("Алушта", -1),
-        ("Багъчасарай", 2),
-        ("Къарасувбазар (Белогорск)", -2),
-        ("Джанкой", -1),
-        ("Кезлев (Евпатория)", 3),
-        ("Сакъ (Саки)", 3),
-        ("Керич (Керчь)", -9),
-        ("Ор Къапы (Перекоп)", 2),
-        ("Акъяр (Севастополь)", 2),
-        ("Эски Къырым (Старый Крым)", -3),
-        ("Кефе (Феодосия)", -5),
-        ("Ялта", 4),
-        ("Судакъ (Судак)", -3),
-        ("Акъшейх (Раздольное)", 3),
-        ("Акъмечит (Черноморское)", 4),
-    ]
+    # Toggle показа названия города
+    show_text = "✅ Показывать город в расписании" if show_location else "⬜ Показывать город в расписании"
+    builder.row(
+        InlineKeyboardButton(text=show_text, callback_data="toggle_location_display")
+    )
     
-    for i in range(0, len(locations), 2):
-        row_locs = locations[i:i+2]
-        builder.row(*[
-            InlineKeyboardButton(
-                text=name,
-                callback_data=f"set_location_{name}_{offset}"
+    # Список городов (по 2 в ряд)
+    for i in range(0, len(LOCATIONS), 2):
+        row_locs = LOCATIONS[i:i+2]
+        buttons = []
+        for j, (name, offset) in enumerate(row_locs):
+            idx = i + j
+            prefix = "✅ " if current_location == name else ""
+            buttons.append(
+                InlineKeyboardButton(
+                    text=f"{prefix}{name}",
+                    callback_data=f"set_loc_{idx}"
+                )
             )
-            for name, offset in row_locs
-        ])
+        builder.row(*buttons)
     
     builder.row(
-        InlineKeyboardButton(text="✏️ Своё смещение", callback_data="manual_offset")
+        InlineKeyboardButton(text="🏙 Другой город", callback_data="custom_location")
     )
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
     )
     
+    return builder.as_markup()
+
+
+def custom_location_offset_keyboard() -> InlineKeyboardMarkup:
+    """Выбор смещения для другого города"""
+    builder = InlineKeyboardBuilder()
+    
+    offsets = [
+        [-10, -5, -3, -2],
+        [-1, 0, 1, 2],
+        [3, 4, 5, 10]
+    ]
+    
+    for row in offsets:
+        builder.row(*[
+            InlineKeyboardButton(
+                text=f"{offset:+d}" if offset != 0 else "0",
+                callback_data=f"custom_offset_{offset}"
+            )
+            for offset in row
+        ])
+    
+    builder.row(
+        InlineKeyboardButton(text="✏️ Ввести вручную", callback_data="custom_offset_manual")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Отмена", callback_data="location")
+    )
+    
+    return builder.as_markup()
+
+
+def back_to_main_keyboard() -> InlineKeyboardMarkup:
+    """Кнопка назад в главное меню"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
+    )
     return builder.as_markup()
 
 
@@ -433,16 +348,4 @@ def back_to_settings_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
     )
-    return builder.as_markup()
-
-
-def confirm_keyboard(action: str) -> InlineKeyboardMarkup:
-    """Подтверждение действия"""
-    builder = InlineKeyboardBuilder()
-    
-    builder.row(
-        InlineKeyboardButton(text="✅ Да", callback_data=f"confirm_{action}"),
-        InlineKeyboardButton(text="❌ Нет", callback_data="main_menu")
-    )
-    
     return builder.as_markup()
