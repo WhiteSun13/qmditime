@@ -72,7 +72,7 @@ def date_navigation_keyboard(current_date: str) -> InlineKeyboardMarkup:
 
 
 def settings_keyboard() -> InlineKeyboardMarkup:
-    """Меню настроек (без локации и смещения времени)"""
+    """Меню настроек"""
     builder = InlineKeyboardBuilder()
     
     builder.row(
@@ -303,6 +303,7 @@ def location_keyboard(current_location: str = "", show_location: bool = True) ->
     
     return builder.as_markup()
 
+
 def custom_location_menu_keyboard() -> InlineKeyboardMarkup:
     """Меню 'Другой город'"""
     builder = InlineKeyboardBuilder()
@@ -319,8 +320,32 @@ def custom_location_menu_keyboard() -> InlineKeyboardMarkup:
     
     return builder.as_markup()
 
-def custom_location_offset_keyboard() -> InlineKeyboardMarkup:
-    """Выбор смещения для другого города"""
+
+def offset_menu_keyboard(general_offset: int = 0, has_prayer_offsets: bool = False) -> InlineKeyboardMarkup:
+    """Меню смещения времени"""
+    builder = InlineKeyboardBuilder()
+    
+    builder.row(
+        InlineKeyboardButton(
+            text=f"⏱ Общее смещение ({general_offset:+d} мин)",
+            callback_data="offset_general"
+        )
+    )
+    
+    prayer_text = "🕌 По намазам" + (" ✓" if has_prayer_offsets else "")
+    builder.row(
+        InlineKeyboardButton(text=prayer_text, callback_data="offset_by_prayer")
+    )
+    
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="custom_location")
+    )
+    
+    return builder.as_markup()
+
+
+def general_offset_keyboard() -> InlineKeyboardMarkup:
+    """Выбор общего смещения"""
     builder = InlineKeyboardBuilder()
     
     offsets = [
@@ -333,16 +358,71 @@ def custom_location_offset_keyboard() -> InlineKeyboardMarkup:
         builder.row(*[
             InlineKeyboardButton(
                 text=f"{offset:+d}" if offset != 0 else "0",
-                callback_data=f"custom_offset_{offset}"
+                callback_data=f"set_general_offset_{offset}"
             )
             for offset in row
         ])
     
     builder.row(
-        InlineKeyboardButton(text="✏️ Ввести вручную", callback_data="custom_offset_manual")
+        InlineKeyboardButton(text="✏️ Ввести вручную", callback_data="general_offset_manual")
     )
     builder.row(
-        InlineKeyboardButton(text="◀️ Отмена", callback_data="location")
+        InlineKeyboardButton(text="◀️ Назад", callback_data="offset_menu")
+    )
+    
+    return builder.as_markup()
+
+
+def prayer_offsets_keyboard(prayer_offsets: dict = None, prayer_names_style: str = "standard") -> InlineKeyboardMarkup:
+    """Выбор намаза для настройки смещения"""
+    builder = InlineKeyboardBuilder()
+    prayer_offsets = prayer_offsets or {}
+    prayer_names = get_prayer_names(prayer_names_style)
+    
+    for prayer_key in PRAYER_KEYS:
+        offset = prayer_offsets.get(prayer_key, 0)
+        offset_text = f" ({offset:+d})" if offset != 0 else ""
+        builder.row(
+            InlineKeyboardButton(
+                text=f"{prayer_names[prayer_key]}{offset_text}",
+                callback_data=f"prayer_offset_{prayer_key}"
+            )
+        )
+    
+    builder.row(
+        InlineKeyboardButton(text="🔄 Сбросить все", callback_data="prayer_offset_reset_all")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="offset_menu")
+    )
+    
+    return builder.as_markup()
+
+
+def prayer_offset_values_keyboard(prayer_key: str) -> InlineKeyboardMarkup:
+    """Выбор значения смещения для намаза"""
+    builder = InlineKeyboardBuilder()
+    
+    offsets = [
+        [-10, -5, -3, -2],
+        [-1, 0, 1, 2],
+        [3, 4, 5, 10]
+    ]
+    
+    for row in offsets:
+        builder.row(*[
+            InlineKeyboardButton(
+                text=f"{offset:+d}" if offset != 0 else "0",
+                callback_data=f"set_prayer_offset_{prayer_key}_{offset}"
+            )
+            for offset in row
+        ])
+    
+    builder.row(
+        InlineKeyboardButton(text="✏️ Ввести вручную", callback_data=f"prayer_offset_manual_{prayer_key}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="offset_by_prayer")
     )
     
     return builder.as_markup()

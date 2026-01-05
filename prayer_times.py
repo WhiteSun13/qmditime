@@ -132,6 +132,7 @@ class PrayerTimesManager:
         
         enabled_prayers = enabled_prayers or PRAYER_KEYS
         prayer_names = PRAYER_NAMES_STYLES.get(prayer_names_style, PRAYER_NAMES_STYLES["standard"])
+        prayer_offsets = prayer_offsets or {}
         
         # Форматируем григорианскую дату
         months_ru = [
@@ -157,10 +158,15 @@ class PrayerTimesManager:
         
         text += "━" * 20 + "\n"
         
-        # Времена намазов
+        # Времена намазов с индивидуальными смещениями
         for prayer in PRAYER_KEYS:
             if prayer in enabled_prayers:
-                text += f"{prayer_names[prayer]} — <b>{times[prayer]}</b>\n"
+                individual_offset = prayer_offsets.get(prayer, 0)
+                if individual_offset != 0:
+                    offset_text = f" <i>({individual_offset:+d})</i>"
+                else:
+                    offset_text = ""
+                text += f"{prayer_names[prayer]} — <b>{times[prayer]}</b>{offset_text}\n"
         
         # Праздник/особый день
         if show_holidays:
@@ -168,7 +174,6 @@ class PrayerTimesManager:
             if holiday:
                 emoji = "🌟" if holiday["type"] == "holiday" else "✨" if holiday.get("night") else "📿"
                 if holiday.get("night"):
-                    # Для ночей показываем диапазон дат
                     prev_date = target_date - timedelta(days=1)
                     if prev_date.month == target_date.month:
                         date_range = f" ({prev_date.day}-{target_date.day} {months_ru[target_date.month]})"
@@ -178,23 +183,29 @@ class PrayerTimesManager:
                 else:
                     text += f"\n{emoji} <b>{holiday['name']}</b>\n"
             
-            # Напоминание о завтрашнем празднике
             tomorrow_holiday = self.get_tomorrow_holiday(target_date)
             if tomorrow_holiday:
                 if tomorrow_holiday.get("night"):
-                    # Для ночей - сегодня вечером начинается
-                    text += f"\n🔔 <i>Сегодня ночью: {tomorrow_holiday['name']}</i>\n"
+                    text += f"\n <i>✨ Сегодня ночью: {tomorrow_holiday['name']}</i>\n"
                 else:
                     text += f"\n🔔 <i>Завтра: {tomorrow_holiday['name']}</i>\n"
             
-            # Обратный отсчёт Рамазана
             ramadan = self.get_ramadan_countdown(target_date)
             if ramadan and ramadan.get("days", 0) <= 60:
                 text += f"\n{ramadan['text']}\n"
         
-        if general_offset != 0:
-            sign = "+" if general_offset > 0 else ""
-            text += f"\n⏱ <i>Время скорректировано на {sign}{general_offset} мин.</i>"
+        # Информация о смещениях
+        has_prayer_offsets = bool(prayer_offsets and any(v != 0 for v in prayer_offsets.values()))
+        
+        if general_offset != 0 or has_prayer_offsets:
+            text += "\n"
+            if general_offset != 0:
+                sign = "+" if general_offset > 0 else ""
+                text += f"⏱ <i>Время скорректировано на {sign}{general_offset} мин.</i>"
+            if has_prayer_offsets:
+                if general_offset != 0:
+                    text += "\n"
+                text += f"⏱ <i>Индивидуальные смещения применены</i>"
         
         return text
     
