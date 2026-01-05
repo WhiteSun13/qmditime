@@ -26,7 +26,7 @@ async def show_location(callback: CallbackQuery, state: FSMContext):
     show_loc = bool(settings.get('show_location', 1)) if settings else True
     
     text = (
-        "📍 <b>Выбор города</b>\n\n"
+        "📍 <b>Выбор локации</b>\n\n"
         f"Текущий: <b>{current}</b>\n"
         f"Смещение: <b>{offset:+d} мин</b>\n\n"
         "Выберите ваш город или укажите другой:"
@@ -75,8 +75,8 @@ async def custom_location_start(callback: CallbackQuery, state: FSMContext):
     """Начать ввод другого города"""
     text = (
         "🏙 <b>Другой город</b>\n\n"
-        "Введите название вашего города:\n\n"
-        "<i>Например: Москва, Казань, Мой город</i>"
+        "Введите название вашей локации (населённого пункта):\n\n"
+        "<i>Например: Демерджи, Новофёдоровка, Мой дом</i>"
     )
     
     await callback.message.edit_text(text, parse_mode="HTML")
@@ -136,7 +136,7 @@ async def process_offset_button(callback: CallbackQuery, state: FSMContext):
     city_name = data.get('city_name')
     
     if not city_name:
-        await callback.answer("❌ Сначала введите название города", show_alert=True)
+        await callback.answer("❌ Сначала введите название локации", show_alert=True)
         await state.clear()
         return
     
@@ -154,7 +154,7 @@ async def process_offset_button(callback: CallbackQuery, state: FSMContext):
     show_loc = bool(settings.get('show_location', 1)) if settings else True
     
     text = (
-        "📍 <b>Выбор города</b>\n\n"
+        "📍 <b>Выбор локации</b>\n\n"
         f"Текущий: <b>{city_name}</b>\n"
         f"Смещение: <b>{offset:+d} мин</b>\n\n"
         "Выберите ваш город или укажите другой:"
@@ -195,7 +195,7 @@ async def process_offset_text(message: Message, state: FSMContext):
         show_loc = bool(settings.get('show_location', 1)) if settings else True
         
         text = (
-            f"✅ Город установлен!\n\n"
+            f"✅ Локация установлена!\n\n"
             f"📍 <b>{city_name}</b>\n"
             f"⏱ Смещение: <b>{offset:+d} мин</b>"
         )
