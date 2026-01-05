@@ -303,6 +303,21 @@ def location_keyboard(current_location: str = "", show_location: bool = True) ->
     
     return builder.as_markup()
 
+def custom_location_menu_keyboard() -> InlineKeyboardMarkup:
+    """Меню 'Другой город'"""
+    builder = InlineKeyboardBuilder()
+    
+    builder.row(
+        InlineKeyboardButton(text="📝 Ввести название", callback_data="enter_city_name")
+    )
+    builder.row(
+        InlineKeyboardButton(text="⏱ Смещение времени", callback_data="offset_menu")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="location")
+    )
+    
+    return builder.as_markup()
 
 def custom_location_offset_keyboard() -> InlineKeyboardMarkup:
     """Выбор смещения для другого города"""
