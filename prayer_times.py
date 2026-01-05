@@ -194,7 +194,7 @@ class PrayerTimesManager:
         
         if general_offset != 0:
             sign = "+" if general_offset > 0 else ""
-            text += f"\n⏱ Смещение: {sign}{general_offset} мин."
+            text += f"\n⏱ <i>Время скорректировано на {sign}{general_offset} мин.</i>"
         
         return text
     
