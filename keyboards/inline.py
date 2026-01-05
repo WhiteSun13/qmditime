@@ -274,7 +274,7 @@ def location_keyboard(current_location: str = "", show_location: bool = True) ->
     builder = InlineKeyboardBuilder()
     
     # Toggle показа названия города
-    show_text = "✅ Показывать город в расписании" if show_location else "⬜ Показывать город в расписании"
+    show_text = "✅ Показывать локацию в расписании" if show_location else "⬜ Показывать локацию в расписании"
     builder.row(
         InlineKeyboardButton(text=show_text, callback_data="toggle_location_display")
     )
@@ -295,7 +295,7 @@ def location_keyboard(current_location: str = "", show_location: bool = True) ->
         builder.row(*buttons)
     
     builder.row(
-        InlineKeyboardButton(text="🏙 Другой город", callback_data="custom_location")
+        InlineKeyboardButton(text="🏙 Другая локация", callback_data="custom_location")
     )
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
