@@ -8,6 +8,11 @@ from datetime import datetime, timedelta, date
 import pytz
 from config import TIMEZONE, PRAYER_NAMES_STYLES, HOLIDAYS, ADMIN_ID
 
+def is_admin(user_id: int) -> bool:
+    """Проверка является ли пользователь админом"""
+    return user_id in ADMIN_ID
+
+
 router = Router()
 
 
@@ -188,6 +193,7 @@ async def cmd_holidays(message: Message):
     await message.answer(text, parse_mode="HTML")
 
 
+# Обновить команду /schedule:
 @router.message(Command("schedule"))
 async def cmd_schedule(message: Message):
     """Команда /schedule - расписание на сегодня"""
@@ -212,7 +218,11 @@ async def cmd_schedule(message: Message):
         show_holidays=bool(settings.get('show_holidays', 1))
     )
     
-    await message.answer(text, reply_markup=schedule_keyboard(), parse_mode="HTML")
+    await message.answer(
+        text,
+        reply_markup=schedule_keyboard(is_admin(message.from_user.id)),
+        parse_mode="HTML"
+    )
 
 
 @router.message(Command("tomorrow"))
@@ -239,7 +249,11 @@ async def cmd_tomorrow(message: Message):
         show_holidays=bool(settings.get('show_holidays', 1))
     )
     
-    await message.answer(text, reply_markup=schedule_keyboard(), parse_mode="HTML")
+    await message.answer(
+        text,
+        reply_markup=schedule_keyboard(is_admin(message.from_user.id)),
+        parse_mode="HTML"
+    )
 
 
 @router.message(Command("next"))
@@ -288,7 +302,12 @@ async def cmd_next(message: Message):
     else:
         text = "❌ Не удалось определить следующий намаз"
     
-    await message.answer(text, reply_markup=schedule_keyboard(), parse_mode="HTML")
+    await message.answer(
+        text,
+        reply_markup=schedule_keyboard(is_admin(message.from_user.id)),
+        parse_mode="HTML"
+    )
+
 
 @router.message(Command("reload"))
 async def cmd_reload(message: Message):

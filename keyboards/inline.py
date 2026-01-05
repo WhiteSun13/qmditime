@@ -29,7 +29,7 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def schedule_keyboard() -> InlineKeyboardMarkup:
+def schedule_keyboard(is_admin: bool = False) -> InlineKeyboardMarkup:
     """Меню расписания"""
     builder = InlineKeyboardBuilder()
     
@@ -40,9 +40,13 @@ def schedule_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(text="⏰ Следующий намаз", callback_data="next_prayer")
     )
-    builder.row(
-        InlineKeyboardButton(text="📆 Выбрать дату", callback_data="schedule_custom_date")
-    )
+    
+    # Выбор даты только для админов
+    if is_admin:
+        builder.row(
+            InlineKeyboardButton(text="📆 Выбрать дату", callback_data="schedule_custom_date")
+        )
+    
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
     )

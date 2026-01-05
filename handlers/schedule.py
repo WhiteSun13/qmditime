@@ -7,13 +7,18 @@ from database import get_chat_settings, save_chat_settings
 from prayer_times import prayer_manager
 from datetime import datetime, timedelta, date
 import pytz
-from config import TIMEZONE, PRAYER_NAMES_STYLES
+from config import TIMEZONE, PRAYER_NAMES_STYLES, ADMIN_ID
 
 router = Router()
 
 
 class ScheduleStates(StatesGroup):
     waiting_custom_date = State()
+
+
+def is_admin(user_id: int) -> bool:
+    """Проверка является ли пользователь админом"""
+    return user_id in ADMIN_ID
 
 
 @router.callback_query(F.data == "schedule")
@@ -26,7 +31,7 @@ async def show_schedule_menu(callback: CallbackQuery):
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_keyboard(),
+        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
         parse_mode="HTML"
     )
     await callback.answer()
@@ -62,7 +67,7 @@ async def schedule_today(callback: CallbackQuery):
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_keyboard(),
+        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
         parse_mode="HTML"
     )
     await callback.answer()
@@ -78,7 +83,7 @@ async def schedule_tomorrow(callback: CallbackQuery):
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_keyboard(),
+        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
         parse_mode="HTML"
     )
     await callback.answer()
@@ -86,7 +91,11 @@ async def schedule_tomorrow(callback: CallbackQuery):
 
 @router.callback_query(F.data == "schedule_custom_date")
 async def schedule_custom_date(callback: CallbackQuery):
-    """Показать выбор даты"""
+    """Показать выбор даты (только для админов)"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Нет доступа", show_alert=True)
+        return
+    
     tz = pytz.timezone(TIMEZONE)
     today = datetime.now(tz).date()
     
@@ -104,6 +113,10 @@ async def schedule_custom_date(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("date_nav_"))
 async def navigate_date(callback: CallbackQuery):
     """Навигация по датам"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Нет доступа", show_alert=True)
+        return
+    
     parts = callback.data.replace("date_nav_", "").rsplit("_", 1)
     current_date_str = parts[0]
     offset_days = int(parts[1])
@@ -128,6 +141,10 @@ async def navigate_date(callback: CallbackQuery):
 @router.callback_query(F.data == "schedule_enter_date")
 async def enter_date(callback: CallbackQuery, state: FSMContext):
     """Ввод даты вручную"""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("⛔ Нет доступа", show_alert=True)
+        return
+    
     text = (
         "✏️ <b>Введите дату</b>\n\n"
         "Формат: ДД.ММ.ГГГГ\n"
@@ -144,20 +161,23 @@ async def enter_date(callback: CallbackQuery, state: FSMContext):
 @router.message(ScheduleStates.waiting_custom_date)
 async def process_custom_date(message: Message, state: FSMContext):
     """Обработка введённой даты"""
+    if not is_admin(message.from_user.id):
+        await state.clear()
+        return
+    
     import re
     
     text = message.text.strip()
     tz = pytz.timezone(TIMEZONE)
     current_year = datetime.now(tz).year
     
-    # Форматы: ДД.ММ.ГГГГ или ДД.ММ
     patterns = [
-        (r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$', True),   # ДД.ММ.ГГГГ
-        (r'^(\d{1,2})\.(\d{1,2})$', False),            # ДД.ММ
-        (r'^(\d{1,2})/(\d{1,2})/(\d{4})$', True),     # ДД/ММ/ГГГГ
-        (r'^(\d{1,2})/(\d{1,2})$', False),            # ДД/ММ
-        (r'^(\d{1,2})-(\d{1,2})-(\d{4})$', True),     # ДД-ММ-ГГГГ
-        (r'^(\d{1,2})-(\d{1,2})$', False),            # ДД-ММ
+        (r'^(\d{1,2})\.(\d{1,2})\.(\d{4})$', True),
+        (r'^(\d{1,2})\.(\d{1,2})$', False),
+        (r'^(\d{1,2})/(\d{1,2})/(\d{4})$', True),
+        (r'^(\d{1,2})/(\d{1,2})$', False),
+        (r'^(\d{1,2})-(\d{1,2})-(\d{4})$', True),
+        (r'^(\d{1,2})-(\d{1,2})$', False),
     ]
     
     parsed_date = None
@@ -242,7 +262,7 @@ async def next_prayer(callback: CallbackQuery):
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_keyboard(),
+        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
         parse_mode="HTML"
     )
     await callback.answer()

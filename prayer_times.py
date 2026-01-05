@@ -205,7 +205,7 @@ class PrayerTimesManager:
             if has_prayer_offsets:
                 if general_offset != 0:
                     text += "\n"
-                text += f"⏱ <i>Индивидуальные смещения применены</i>"
+                text += f"<i>Индивидуальные смещения применены</i>"
         
         return text
     
