@@ -148,12 +148,18 @@ class PrayerScheduler:
         """Отправка напоминания о намазе"""
         prayer_names = PRAYER_NAMES_STYLES.get(prayer_names_style, PRAYER_NAMES_STYLES["standard"])
         prayer_name = prayer_names[prayer_key]
-        
-        text = (
-            f"🔔 <b>Скоро намаз!</b>\n\n"
-            f"Через <b>{minutes_before} мин.</b> наступит:\n"
-            f"{prayer_name} — <b>{prayer_time}</b>"
-        )
+        if (prayer_key == "sunrise"):
+            text = (
+                f"🔔 <b>Скоро рассвет!</b>\n\n"
+                f"Через <b>{minutes_before} мин.</b> наступит:\n"
+                f"{prayer_name} — <b>{prayer_time}</b>"
+            )
+        else:
+            text = (
+                f"🔔 <b>Скоро намаз!</b>\n\n"
+                f"Через <b>{minutes_before} мин.</b> наступит:\n"
+                f"{prayer_name} — <b>{prayer_time}</b>"
+            )
         
         await self.bot.send_message(chat_id, text, parse_mode="HTML")
         logger.info(f"Отправлено напоминание о {prayer_key} в чат {chat_id}")
