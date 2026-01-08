@@ -107,7 +107,7 @@ async def show_holidays(callback: CallbackQuery):
     if not year_holidays:
         text = f"❌ Праздники на {current_year} год не найдены"
     else:
-        text = f"🎉 <b>Праздники и особые дни {current_year}</b>\n\n"
+        text = f"🎉 <b>Праздники и особые дни {current_year}</b>\n"
         
         months_ru = [
             "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
