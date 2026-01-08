@@ -268,7 +268,7 @@ async def process_custom_time(message: Message, state: FSMContext):
         await state.clear()
         await message.answer(
             f"✅ Время установлено: {message.text}\n\n"
-            "Используйте /settings для возврата к настройкам."
+            "Используйте /start для возврата в главное меню."
         )
     else:
         await message.answer(

@@ -84,7 +84,7 @@ async def show_help(callback: CallbackQuery):
         "• <b>Праздники</b> — показ праздников в расписании\n"
         "• <b>Напоминания</b> — уведомления за N минут до намаза\n\n"
         "<b>Использование в группах:</b>\n"
-        "Добавьте бота в группу и используйте /settings для настройки"
+        "Добавьте бота в группу и используйте /start для настройки"
     )
     
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
