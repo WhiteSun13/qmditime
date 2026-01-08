@@ -1,6 +1,6 @@
-import pandas as pd
+import csv
 from datetime import datetime, timedelta, date
-from typing import Optional, Dict, List
+from typing import Optional, Dict
 import pytz
 from hijri_converter import Hijri, Gregorian
 from config import (
@@ -11,25 +11,26 @@ from config import (
 
 class PrayerTimesManager:
     def __init__(self):
-        self.df = None
+        self.data: Dict[date, Dict[str, str]] = {}
         self.tz = pytz.timezone(TIMEZONE)
         self.load_data()
     
     def load_data(self):
-        """Загрузка данных из CSV"""
-        self.df = pd.read_csv(CSV_PATH, parse_dates=['date'])
-        self.df['date'] = pd.to_datetime(self.df['date']).dt.date
+        """Загрузка CSV"""
+        self.data = {}
+        with open(CSV_PATH, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                try:
+                    d = datetime.strptime(row['date'].strip(), "%Y-%m-%d").date()
+                    self.data[d] = {key: row[key].strip() for key in PRAYER_KEYS}
+                except:
+                    pass
+        print(f"Загружено {len(self.data)} дней")
     
     def get_times_for_date(self, target_date: date) -> Optional[Dict[str, str]]:
         """Получить времена намазов на определённую дату"""
-        row = self.df[self.df['date'] == target_date]
-        if row.empty:
-            return None
-        
-        return {
-            prayer: row[prayer].values[0]
-            for prayer in PRAYER_KEYS
-        }
+        return self.data.get(target_date)
     
     def apply_offset(self, time_str: str, offset_minutes: int) -> str:
         """Применить смещение к времени"""

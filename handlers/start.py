@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart, Command
 from keyboards.inline import main_menu_keyboard, schedule_keyboard
 from database import save_chat_settings, get_chat_settings
@@ -322,3 +322,28 @@ async def cmd_reload(message: Message):
         await message.answer(f"✅ Данные перезагружены\n📊 Загружено {rows} дней")
     except Exception as e:
         await message.answer(f"❌ Ошибка: {e}")
+
+
+@router.message(Command("export"))
+async def cmd_export(message: Message):
+    """Экспорт базы данных (только для админов)"""
+    if message.from_user.id not in ADMIN_ID:
+        await message.answer("⛔ Нет доступа")
+        return
+    
+    from config import DATABASE_PATH
+    import os
+    
+    if not os.path.exists(DATABASE_PATH):
+        await message.answer("❌ База данных не найдена")
+        return
+    
+    try:
+        file = FSInputFile(DATABASE_PATH, filename="prayer_bot_backup.db")
+        await message.answer_document(
+            file,
+            caption=f"📦 <b>Экспорт базы данных</b>\n\n"
+                    f"📅 Дата: {datetime.now(pytz.timezone(TIMEZONE)).strftime('%d.%m.%Y %H:%M')}"
+        )
+    except Exception as e:
+        await message.answer(f"❌ Ошибка экспорта: {e}")
