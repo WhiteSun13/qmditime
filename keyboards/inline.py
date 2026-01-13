@@ -15,14 +15,14 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(text="📅 Расписание", callback_data="schedule"),
-        InlineKeyboardButton(text="⚙️ Настройки", callback_data="settings")
-    )
-    builder.row(
-        InlineKeyboardButton(text="🔔 Напоминания", callback_data="reminders"),
-        InlineKeyboardButton(text="📍 Локация", callback_data="location")
+        InlineKeyboardButton(text="🔔 Напоминания", callback_data="reminders")
     )
     builder.row(
         InlineKeyboardButton(text="🎉 Праздники", callback_data="holidays"),
+        InlineKeyboardButton(text="📍 Локация", callback_data="location")
+    )
+    builder.row(
+        InlineKeyboardButton(text="⚙️ Настройки", callback_data="settings"),
         InlineKeyboardButton(text="❓ Помощь", callback_data="help")
     )
     

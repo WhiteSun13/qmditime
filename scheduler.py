@@ -150,7 +150,7 @@ class PrayerScheduler:
         prayer_name = prayer_names[prayer_key]
         if (prayer_key == "sunrise"):
             text = (
-                f"🔔 <b>Скоро рассвет!</b>\n\n"
+                f"🔔 <b>Скоро восход солнца!</b>\n\n"
                 f"Через <b>{minutes_before} мин.</b> наступит:\n"
                 f"{prayer_name} — <b>{prayer_time}</b>"
             )
