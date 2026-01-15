@@ -187,7 +187,12 @@ class PrayerTimesManager:
             tomorrow_holiday = self.get_tomorrow_holiday(target_date)
             if tomorrow_holiday:
                 if tomorrow_holiday.get("night"):
-                    text += f"\n <i>✨ Сегодня ночью: {tomorrow_holiday['name']}</i>\n"
+                    prev_date = target_date - timedelta(days=1)
+                    if prev_date.month == target_date.month:
+                        date_range = f" ({prev_date.day}-{target_date.day} {months_ru[target_date.month]})"
+                    else:
+                        date_range = f" ({prev_date.day} {months_ru[prev_date.month]} - {target_date.day} {months_ru[target_date.month]})"
+                    text += f"\n <i>✨ В эту ночь: {tomorrow_holiday['name']}{date_range}</i>\n"
                 else:
                     text += f"\n🔔 <i>Завтра: {tomorrow_holiday['name']}</i>\n"
             
