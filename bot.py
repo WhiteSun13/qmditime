@@ -42,7 +42,7 @@ async def main():
     try:
         # Удаление webhook и запуск polling
         await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot)
+        await dp.start_polling(bot, polling_timeout=60)
     finally:
         scheduler.stop()
         await bot.session.close()

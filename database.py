@@ -53,6 +53,12 @@ async def init_db():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+        await db.execute("""
+            CREATE INDEX IF NOT EXISTS idx_daily_schedule_time 
+            ON chat_settings(daily_schedule_time) 
+            WHERE is_active = 1 AND daily_schedule_time IS NOT NULL
+        """)
         
         # Миграция: добавление новых колонок если их нет
         try:
