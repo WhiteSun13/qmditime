@@ -175,11 +175,11 @@ class PrayerTimesManager:
             if holiday:
                 emoji = "🌟" if holiday["type"] == "holiday" else "✨" if holiday.get("night") else "📿"
                 if holiday.get("night"):
-                    prev_date = target_date - timedelta(days=1)
+                    next_date = target_date + timedelta(days=1)
                     if prev_date.month == target_date.month:
-                        date_range = f" ({prev_date.day}-{target_date.day} {months_ru[target_date.month]})"
+                        date_range = f" ({target_date.day}-{next_date.day} {months_ru[target_date.month]})"
                     else:
-                        date_range = f" ({prev_date.day} {months_ru[prev_date.month]} - {target_date.day} {months_ru[target_date.month]})"
+                        date_range = f" ({target_date.day} {months_ru[target_date.month]} - {next_date.day} {months_ru[next_date.month]})"
                     text += f"\n{emoji} <b>{holiday['name']}</b>{date_range}\n"
                 else:
                     text += f"\n{emoji} <b>{holiday['name']}</b>\n"
