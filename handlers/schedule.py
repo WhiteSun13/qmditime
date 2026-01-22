@@ -8,6 +8,8 @@ from prayer_times import prayer_manager
 from datetime import datetime, timedelta, date
 import pytz
 from config import TIMEZONE, PRAYER_NAMES_STYLES, ADMIN_ID
+from contextlib import suppress
+from aiogram.exceptions import TelegramBadRequest
 
 router = Router()
 
@@ -65,11 +67,15 @@ async def schedule_today(callback: CallbackQuery):
     
     text = await get_schedule_text(callback.message.chat.id, today)
     
-    await callback.message.edit_text(
-        text,
-        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
-        parse_mode="HTML"
-    )
+    # Игнорируем ошибку, если текст не изменился
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(
+            text,
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            parse_mode="HTML"
+        )
+    
+    # answer() должен быть ВНЕ блока suppress, чтобы крутилка на кнопке исчезла
     await callback.answer()
 
 
@@ -81,11 +87,12 @@ async def schedule_tomorrow(callback: CallbackQuery):
     
     text = await get_schedule_text(callback.message.chat.id, tomorrow)
     
-    await callback.message.edit_text(
-        text,
-        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
-        parse_mode="HTML"
-    )
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(
+            text,
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            parse_mode="HTML"
+        )
     await callback.answer()
 
 
@@ -260,9 +267,10 @@ async def next_prayer(callback: CallbackQuery):
     else:
         text = "❌ Не удалось определить следующий намаз"
     
-    await callback.message.edit_text(
-        text,
-        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
-        parse_mode="HTML"
-    )
+    with suppress(TelegramBadRequest):
+        await callback.message.edit_text(
+            text,
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            parse_mode="HTML"
+        )
     await callback.answer()
