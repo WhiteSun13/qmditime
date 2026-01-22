@@ -1,7 +1,7 @@
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram.filters import CommandStart, Command
-from keyboards.inline import main_menu_keyboard, schedule_keyboard
+from keyboards.inline import main_menu_keyboard, schedule_keyboard, help_keyboard
 from database import save_chat_settings, get_chat_settings
 from prayer_times import prayer_manager
 from datetime import datetime, timedelta, date
@@ -93,7 +93,7 @@ async def show_help(callback: CallbackQuery):
         [InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")]
     ])
     
-    await callback.message.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+    await callback.message.edit_text(text, reply_markup=help_keyboard(), parse_mode="HTML")
     await callback.answer()
 
 

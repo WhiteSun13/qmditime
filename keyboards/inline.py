@@ -448,3 +448,26 @@ def back_to_settings_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="◀️ Назад", callback_data="settings")
     )
     return builder.as_markup()
+
+def cancel_keyboard() -> InlineKeyboardMarkup:
+    """Кнопка отмены"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_feedback")
+    )
+    return builder.as_markup()
+
+def help_keyboard() -> InlineKeyboardMarkup:
+    """Меню раздела Помощь"""
+    builder = InlineKeyboardBuilder()
+    
+    # Кнопка связи теперь здесь
+    builder.row(
+        InlineKeyboardButton(text="✍️ Написать разработчику", callback_data="feedback")
+    )
+    
+    builder.row(
+        InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
+    )
+    
+    return builder.as_markup()

@@ -1,5 +1,5 @@
 from aiogram import Router
-from . import start, settings, schedule, reminders, location, status
+from . import start, settings, schedule, reminders, location, status, feedback
 
 def setup_routers() -> Router:
     """Настройка роутеров"""
@@ -11,5 +11,6 @@ def setup_routers() -> Router:
     router.include_router(reminders.router)
     router.include_router(location.router)
     router.include_router(status.router)
+    router.include_router(feedback.router)
     
     return router
