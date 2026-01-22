@@ -187,7 +187,7 @@ class PrayerTimesManager:
             tomorrow_holiday = self.get_tomorrow_holiday(target_date)
             if tomorrow_holiday:
                 if tomorrow_holiday.get("night"):
-                    next_date = target_date - timedelta(days=1)
+                    next_date = target_date + timedelta(days=1)
                     if next_date.month == target_date.month:
                         date_range = f" ({target_date.day}-{next_date.day})"
                     else:
