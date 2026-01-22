@@ -197,3 +197,12 @@ async def get_chats_with_reminders() -> list:
                 settings['enabled_prayers'] = json.loads(settings.get('enabled_prayers') or '[]')
                 result.append(settings)
             return result
+
+async def set_chat_active_status(chat_id: int, is_active: bool):
+    """Обновление статуса активности чата"""
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute(
+            "UPDATE chat_settings SET is_active = ? WHERE chat_id = ?",
+            (1 if is_active else 0, chat_id)
+        )
+        await db.commit()

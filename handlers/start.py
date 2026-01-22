@@ -23,7 +23,8 @@ async def cmd_start(message: Message):
     
     await save_chat_settings(
         chat_id=message.chat.id,
-        chat_type=chat_type
+        chat_type=chat_type,
+        is_active=1 
     )
     
     text = (

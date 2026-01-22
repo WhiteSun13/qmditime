@@ -2,10 +2,12 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timedelta
 import pytz
+import asyncio
 from aiogram import Bot
 from database import get_chats_with_daily_schedule, get_chats_with_reminders
 from prayer_times import prayer_manager
 from config import TIMEZONE, PRAYER_NAMES_STYLES
+from broadcaster import send_safe_message 
 import logging
 
 logger = logging.getLogger(__name__)
@@ -39,7 +41,6 @@ class PrayerScheduler:
         logger.info("Планировщик запущен")
     
     def stop(self):
-        """Остановка планировщика"""
         self.scheduler.shutdown()
         logger.info("Планировщик остановлен")
     
@@ -50,15 +51,26 @@ class PrayerScheduler:
         
         chats = await get_chats_with_daily_schedule()
         
-        for chat in chats:
-            if chat.get('daily_schedule_time') == current_time:
-                try:
-                    await self.send_daily_schedule(chat)
-                except Exception as e:
-                    logger.error(f"Ошибка отправки расписания в чат {chat['chat_id']}: {e}")
-    
-    async def send_daily_schedule(self, chat_settings: dict):
-        """Отправка ежедневного расписания"""
+        # Фильтруем тех, кому нужно отправить прямо сейчас
+        target_chats = [chat for chat in chats if chat.get('daily_schedule_time') == current_time]
+        
+        if not target_chats:
+            return
+
+        logger.info(f"Начинаем рассылку расписания для {len(target_chats)} чатов")
+        
+        # Запускаем рассылку в цикле
+        count = 0
+        for chat in target_chats:
+            asyncio.create_task(self.process_daily_schedule_sending(chat))
+            # Небольшая пауза, чтобы не убить API Telegram (примерно 20 сообщений в секунду)
+            await asyncio.sleep(0.05) 
+            count += 1
+            
+        logger.info(f"Задачи на рассылку созданы для {count} чатов")
+
+    async def process_daily_schedule_sending(self, chat_settings: dict):
+        """Подготовка данных и вызов безопасной отправки"""
         chat_id = chat_settings['chat_id']
         
         # Определяем дату
@@ -81,9 +93,9 @@ class PrayerScheduler:
             show_holidays=bool(chat_settings.get('show_holidays', 1))
         )
         
-        await self.bot.send_message(chat_id, text, parse_mode="HTML")
-        logger.info(f"Отправлено ежедневное расписание в чат {chat_id}")
-    
+        # Используем безопасную отправку
+        await send_safe_message(self.bot, chat_id, text)
+
     async def check_reminders(self):
         """Проверка и отправка напоминаний"""
         now = datetime.now(self.tz)
@@ -92,52 +104,57 @@ class PrayerScheduler:
         chats = await get_chats_with_reminders()
         
         for chat in chats:
-            reminders = chat.get('reminders', {})
-            if not reminders:
+            # Оборачиваем обработку каждого чата в таск, чтобы долгие вычисления не блокировали цикл
+            # Но для напоминаний лучше делать это последовательно или батчами, 
+            # так как здесь есть логика проверки времени
+            await self.process_single_chat_reminder(chat, now, today)
+
+    async def process_single_chat_reminder(self, chat: dict, now: datetime, today):
+        """Логика проверки одного чата для напоминаний"""
+        reminders = chat.get('reminders', {})
+        if not reminders:
+            return
+        
+        times = prayer_manager.get_adjusted_times(
+            today,
+            chat.get('time_offset', 0),
+            chat.get('prayer_offsets', {})
+        )
+        
+        if not times:
+            return
+        
+        prayer_names_style = chat.get('prayer_names_style', 'standard')
+        
+        for prayer_key, reminder_minutes in reminders.items():
+            prayer_time_str = times.get(prayer_key)
+            if not prayer_time_str:
                 continue
             
-            times = prayer_manager.get_adjusted_times(
-                today,
-                chat.get('time_offset', 0),
-                chat.get('prayer_offsets', {})
+            prayer_time = datetime.strptime(prayer_time_str, "%H:%M")
+            prayer_datetime = now.replace(
+                hour=prayer_time.hour,
+                minute=prayer_time.minute,
+                second=0,
+                microsecond=0
             )
             
-            if not times:
-                continue
+            # Время напоминания
+            reminder_datetime = prayer_datetime - timedelta(minutes=reminder_minutes)
             
-            prayer_names_style = chat.get('prayer_names_style', 'standard')
-            
-            for prayer_key, reminder_minutes in reminders.items():
-                prayer_time_str = times.get(prayer_key)
-                if not prayer_time_str:
-                    continue
+            # Проверяем нужно ли отправить напоминание (с точностью до минуты)
+            if (reminder_datetime.hour == now.hour and 
+                reminder_datetime.minute == now.minute):
                 
-                prayer_time = datetime.strptime(prayer_time_str, "%H:%M")
-                prayer_datetime = now.replace(
-                    hour=prayer_time.hour,
-                    minute=prayer_time.minute,
-                    second=0,
-                    microsecond=0
+                await self.send_reminder_safe(
+                    chat['chat_id'],
+                    prayer_key,
+                    prayer_time_str,
+                    reminder_minutes,
+                    prayer_names_style
                 )
-                
-                # Время напоминания
-                reminder_datetime = prayer_datetime - timedelta(minutes=reminder_minutes)
-                
-                # Проверяем нужно ли отправить напоминание (с точностью до минуты)
-                if (reminder_datetime.hour == now.hour and 
-                    reminder_datetime.minute == now.minute):
-                    try:
-                        await self.send_reminder(
-                            chat['chat_id'],
-                            prayer_key,
-                            prayer_time_str,
-                            reminder_minutes,
-                            prayer_names_style
-                        )
-                    except Exception as e:
-                        logger.error(f"Ошибка отправки напоминания в чат {chat['chat_id']}: {e}")
-    
-    async def send_reminder(
+
+    async def send_reminder_safe(
         self,
         chat_id: int,
         prayer_key: str,
@@ -145,10 +162,11 @@ class PrayerScheduler:
         minutes_before: int,
         prayer_names_style: str = "standard"
     ):
-        """Отправка напоминания о намазе"""
+        """Подготовка текста и отправка напоминания"""
         prayer_names = PRAYER_NAMES_STYLES.get(prayer_names_style, PRAYER_NAMES_STYLES["standard"])
         prayer_name = prayer_names[prayer_key]
-        if (prayer_key == "sunrise"):
+        
+        if prayer_key == "sunrise":
             text = (
                 f"🔔 <b>Скоро восход солнца!</b>\n\n"
                 f"Через <b>{minutes_before} мин.</b> наступит:\n"
@@ -161,5 +179,5 @@ class PrayerScheduler:
                 f"{prayer_name} — <b>{prayer_time}</b>"
             )
         
-        await self.bot.send_message(chat_id, text, parse_mode="HTML")
-        logger.info(f"Отправлено напоминание о {prayer_key} в чат {chat_id}")
+        # Используем безопасную отправку
+        await send_safe_message(self.bot, chat_id, text)
