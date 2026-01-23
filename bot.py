@@ -8,6 +8,7 @@ from config import BOT_TOKEN
 from database import init_db
 from handlers import setup_routers
 from scheduler import PrayerScheduler
+from middlewares.i18n import I18nMiddleware
 
 # Настройка логирования
 logging.basicConfig(
@@ -29,6 +30,10 @@ async def main():
     
     # Создание диспетчера
     dp = Dispatcher()
+
+    # Подключение i18n  middleware
+    dp.message.middleware(I18nMiddleware())
+    dp.callback_query.middleware(I18nMiddleware())
     
     # Подключение роутеров
     dp.include_router(setup_routers())

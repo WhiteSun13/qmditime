@@ -1,13 +1,14 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from config import PRAYER_NAMES_STYLES, PRAYER_KEYS, LOCATIONS
+from locales import get_text 
 
 
 def get_prayer_names(style: str = "standard"):
     return PRAYER_NAMES_STYLES.get(style, PRAYER_NAMES_STYLES["standard"])
 
 
-def main_menu_keyboard() -> InlineKeyboardMarkup:
+def main_menu_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
     """Главное меню"""
     builder = InlineKeyboardBuilder()
     builder.row(
@@ -75,7 +76,7 @@ def date_navigation_keyboard(current_date: str) -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def settings_keyboard() -> InlineKeyboardMarkup:
+def settings_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
     """Меню настроек"""
     builder = InlineKeyboardBuilder()
     
@@ -87,6 +88,9 @@ def settings_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(text="🎉 Праздники", callback_data="settings_holidays")
+    )
+    builder.row(
+        InlineKeyboardButton(text=get_text(lang, "btn_language"), callback_data="settings_language")
     )
     builder.row(
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
@@ -470,4 +474,28 @@ def help_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="◀️ Назад", callback_data="main_menu")
     )
     
+    return builder.as_markup()
+
+def language_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
+    """Клавиатура выбора языка"""
+    builder = InlineKeyboardBuilder()
+    
+    langs = [
+        ("ru", "lang_ru"),
+        ("crh_cyr", "lang_crh_cyr"),
+        ("crh_lat", "lang_crh_lat")
+    ]
+    
+    for code, key in langs:
+        prefix = "✅ " if code == lang else ""
+        builder.row(
+            InlineKeyboardButton(
+                text=prefix + get_text(lang, key),
+                callback_data=f"set_lang_{code}"
+            )
+        )
+        
+    builder.row(
+        InlineKeyboardButton(text=get_text(lang, "btn_back"), callback_data="settings")
+    )
     return builder.as_markup()

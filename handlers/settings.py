@@ -6,7 +6,7 @@ from keyboards.inline import (
     settings_keyboard, auto_schedule_keyboard,
     schedule_day_keyboard, prayer_names_style_keyboard,
     hijri_settings_keyboard, holidays_settings_keyboard,
-    back_to_settings_keyboard
+    language_keyboard
 )
 from database import get_chat_settings, save_chat_settings
 
@@ -306,3 +306,52 @@ async def set_day(callback: CallbackQuery):
     await save_chat_settings(callback.message.chat.id, schedule_day=day)
     await callback.answer(f"✅ Выбран: {'сегодня' if day == 'today' else 'завтра'}")
     await settings_day(callback)
+
+
+# Меню выбора языка
+@router.callback_query(F.data == "settings_language")
+async def show_language_menu(callback: CallbackQuery, _: dict, lang: str):
+    text = _("language_select")
+    await callback.message.edit_text(text, reply_markup=language_keyboard(lang), parse_mode="HTML")
+    await callback.answer()
+
+
+# Обработка выбора языка
+@router.callback_query(F.data.startswith("set_lang_"))
+async def set_language(callback: CallbackQuery):
+    # Тут мы не можем использовать injected _, так как язык меняется на лету
+    # Поэтому берем новый код языка
+    new_lang = callback.data.replace("set_lang_", "")
+    
+    # Сохраняем в БД
+    await save_chat_settings(callback.message.chat.id, language=new_lang)
+    
+    # Опционально: Меняем также стиль названий намазов
+    # Если выбрали латиницу -> ставим crimean_latin
+    # Если кириллицу -> ставим crimean_cyrillic
+    prayer_style = "standard"
+    if new_lang == "crh_lat":
+        prayer_style = "crimean_latin"
+    elif new_lang == "crh_cyr":
+        prayer_style = "crimean_cyrillic"
+        
+    await save_chat_settings(callback.message.chat.id, prayer_names_style=prayer_style)
+    
+    # Импортируем get_text вручную, чтобы ответить на НОВОМ языке сразу
+    from locales import get_text
+    
+    text = get_text(new_lang, "changed_lang")
+    await callback.answer(text)
+    
+    # Возвращаем в настройки (уже на новом языке)
+    # Нужно обновить клавиатуру настроек
+    from locales import get_text
+    
+    settings_text = get_text(new_lang, "settings_title")
+    
+    # Тут нужно обновить функцию settings_keyboard, чтобы она принимала lang
+    await callback.message.edit_text(
+        settings_text, 
+        reply_markup=settings_keyboard(lang=new_lang), # Предполагается что вы обновили эту функцию
+        parse_mode="HTML"
+    )

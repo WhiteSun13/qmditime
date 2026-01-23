@@ -81,6 +81,10 @@ async def init_db():
             await db.execute("ALTER TABLE chat_settings ADD COLUMN show_holidays INTEGER DEFAULT 1")
         except:
             pass
+        try:
+            await db.execute("ALTER TABLE chat_settings ADD COLUMN language TEXT DEFAULT 'ru'")
+        except:
+            pass
         
         await db.commit()
 
@@ -104,6 +108,7 @@ async def get_chat_settings(chat_id: int) -> Optional[Dict[str, Any]]:
                 settings.setdefault('hijri_style', 'cyrillic')
                 settings.setdefault('show_hijri', 1)
                 settings.setdefault('show_holidays', 1)
+                settings.setdefault('language', 'ru')
                 return settings
             return None
 
