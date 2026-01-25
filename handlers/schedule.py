@@ -10,6 +10,7 @@ import pytz
 from config import TIMEZONE, PRAYER_NAMES_STYLES, ADMIN_ID
 from contextlib import suppress
 from aiogram.exceptions import TelegramBadRequest
+from locales import get_text
 
 router = Router()
 
@@ -24,22 +25,19 @@ def is_admin(user_id: int) -> bool:
 
 
 @router.callback_query(F.data == "schedule")
-async def show_schedule_menu(callback: CallbackQuery):
+async def show_schedule_menu(callback: CallbackQuery, _: callable, lang: str):
     """Показать меню расписания"""
-    text = (
-        "📅 <b>Расписание намаза</b>\n\n"
-        "Выберите день:"
-    )
+    text = _("schedule_title")
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+        reply_markup=schedule_keyboard(is_admin(callback.from_user.id), lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
-async def get_schedule_text(chat_id: int, target_date: date) -> str:
+async def get_schedule_text(chat_id: int, target_date: date, lang: str) -> str:
     """Получить текст расписания для даты"""
     settings = await get_chat_settings(chat_id)
     if not settings:
@@ -55,23 +53,24 @@ async def get_schedule_text(chat_id: int, target_date: date) -> str:
         prayer_names_style=settings.get('prayer_names_style', 'standard'),
         show_hijri=bool(settings.get('show_hijri', 1)),
         hijri_style=settings.get('hijri_style', 'cyrillic'),
-        show_holidays=bool(settings.get('show_holidays', 1))
+        show_holidays=bool(settings.get('show_holidays', 1)),
+        lang=lang
     )
 
 
 @router.callback_query(F.data == "schedule_today")
-async def schedule_today(callback: CallbackQuery):
+async def schedule_today(callback: CallbackQuery, _: callable, lang: str):
     """Расписание на сегодня"""
     tz = pytz.timezone(TIMEZONE)
     today = datetime.now(tz).date()
     
-    text = await get_schedule_text(callback.message.chat.id, today)
+    text = await get_schedule_text(callback.message.chat.id, today, lang)
     
     # Игнорируем ошибку, если текст не изменился
     with suppress(TelegramBadRequest):
         await callback.message.edit_text(
             text,
-            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id), lang),
             parse_mode="HTML"
         )
     
@@ -80,48 +79,48 @@ async def schedule_today(callback: CallbackQuery):
 
 
 @router.callback_query(F.data == "schedule_tomorrow")
-async def schedule_tomorrow(callback: CallbackQuery):
+async def schedule_tomorrow(callback: CallbackQuery, _: callable, lang: str):
     """Расписание на завтра"""
     tz = pytz.timezone(TIMEZONE)
     tomorrow = datetime.now(tz).date() + timedelta(days=1)
     
-    text = await get_schedule_text(callback.message.chat.id, tomorrow)
+    text = await get_schedule_text(callback.message.chat.id, tomorrow, lang)
     
     with suppress(TelegramBadRequest):
         await callback.message.edit_text(
             text,
-            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id), lang),
             parse_mode="HTML"
         )
     await callback.answer()
 
 
 @router.callback_query(F.data == "schedule_custom_date")
-async def schedule_custom_date(callback: CallbackQuery):
+async def schedule_custom_date(callback: CallbackQuery, _: callable, lang: str):
     """Показать выбор даты (только для админов)"""
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ Нет доступа", show_alert=True)
+        await callback.answer(_("no_access"), show_alert=True)
         return
     
     tz = pytz.timezone(TIMEZONE)
     today = datetime.now(tz).date()
     
-    text = await get_schedule_text(callback.message.chat.id, today)
-    text += "\n\n<i>Используйте кнопки для навигации по датам</i>"
+    text = await get_schedule_text(callback.message.chat.id, today, lang)
+    text += f"\n\n<i>{_('use_navigation')}</i>"
     
     await callback.message.edit_text(
         text,
-        reply_markup=date_navigation_keyboard(today.isoformat()),
+        reply_markup=date_navigation_keyboard(today.isoformat(), lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("date_nav_"))
-async def navigate_date(callback: CallbackQuery):
+async def navigate_date(callback: CallbackQuery, _: callable, lang: str):
     """Навигация по датам"""
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ Нет доступа", show_alert=True)
+        await callback.answer(_("no_access"), show_alert=True)
         return
     
     parts = callback.data.replace("date_nav_", "").rsplit("_", 1)
@@ -132,36 +131,35 @@ async def navigate_date(callback: CallbackQuery):
         current_date = date.fromisoformat(current_date_str)
         new_date = current_date + timedelta(days=offset_days)
         
-        text = await get_schedule_text(callback.message.chat.id, new_date)
-        text += "\n\n<i>Используйте кнопки для навигации по датам</i>"
+        text = await get_schedule_text(callback.message.chat.id, new_date, lang)
+        text += f"\n\n<i>{_('use_navigation')}</i>"
         
         await callback.message.edit_text(
             text,
-            reply_markup=date_navigation_keyboard(new_date.isoformat()),
+            reply_markup=date_navigation_keyboard(new_date.isoformat(), lang),
             parse_mode="HTML"
         )
         await callback.answer()
     except Exception as e:
-        await callback.answer(f"❌ Ошибка: {e}", show_alert=True)
+        await callback.answer(f"{_('error')}: {e}", show_alert=True)
 
 
 @router.callback_query(F.data == "schedule_enter_date")
-async def enter_date(callback: CallbackQuery, state: FSMContext):
+async def enter_date(callback: CallbackQuery, state: FSMContext, _: callable, lang: str):
     """Ввод даты вручную"""
     if not is_admin(callback.from_user.id):
-        await callback.answer("⛔ Нет доступа", show_alert=True)
+        await callback.answer(_("no_access"), show_alert=True)
         return
     
     text = (
-        "✏️ <b>Введите дату</b>\n\n"
-        "Формат: ДД.ММ.ГГГГ\n"
-        "Например: 15.03.2025\n\n"
-        "Или: ДД.ММ (текущий год)\n"
-        "Например: 15.03"
+        f"{_('enter_date_title')}\n\n"
+        f"{_('enter_date_format')}\n\n"
+        f"{_('enter_date_short')}"
     )
     
     await callback.message.edit_text(text, parse_mode="HTML")
     await state.set_state(ScheduleStates.waiting_custom_date)
+    await state.update_data(lang=lang)
     await callback.answer()
 
 
@@ -173,6 +171,10 @@ async def process_custom_date(message: Message, state: FSMContext):
         return
     
     import re
+    
+    data = await state.get_data()
+    lang = data.get('lang', 'ru')
+    _ = lambda key: get_text(lang, key)
     
     text = message.text.strip()
     tz = pytz.timezone(TIMEZONE)
@@ -204,28 +206,23 @@ async def process_custom_date(message: Message, state: FSMContext):
                 pass
     
     if not parsed_date:
-        await message.answer(
-            "❌ Неверный формат даты.\n\n"
-            "Введите дату в формате ДД.ММ.ГГГГ или ДД.ММ\n"
-            "Например: 15.03.2025 или 15.03\n\n"
-            "Отправьте /schedule для отмены"
-        )
+        await message.answer(_("date_invalid"))
         return
     
     await state.clear()
     
-    schedule_text = await get_schedule_text(message.chat.id, parsed_date)
-    schedule_text += "\n\n<i>Используйте кнопки для навигации по датам</i>"
+    schedule_text = await get_schedule_text(message.chat.id, parsed_date, lang)
+    schedule_text += f"\n\n<i>{_('use_navigation')}</i>"
     
     await message.answer(
         schedule_text,
-        reply_markup=date_navigation_keyboard(parsed_date.isoformat()),
+        reply_markup=date_navigation_keyboard(parsed_date.isoformat(), lang),
         parse_mode="HTML"
     )
 
 
 @router.callback_query(F.data == "next_prayer")
-async def next_prayer(callback: CallbackQuery):
+async def next_prayer(callback: CallbackQuery, _: callable, lang: str):
     """Следующий намаз"""
     settings = await get_chat_settings(callback.message.chat.id)
     if not settings:
@@ -254,23 +251,23 @@ async def next_prayer(callback: CallbackQuery):
         minutes, _ = divmod(remainder, 60)
         
         if hours > 0:
-            remaining = f"{hours} ч {minutes} мин"
+            remaining = f"{hours} {_('hour_short')} {minutes} {_('min_short')}"
         else:
-            remaining = f"{minutes} мин"
+            remaining = f"{minutes} {_('min_short')}"
         
         text = (
-            f"⏰ <b>Следующий намаз</b>\n\n"
+            f"{_('next_prayer_title')}\n\n"
             f"{prayer_name}\n"
-            f"🕐 Время: <b>{time}</b>\n"
-            f"⏳ Осталось: <b>{remaining}</b>"
+            f"{_('next_prayer_time')} <b>{time}</b>\n"
+            f"{_('next_prayer_remaining')} <b>{remaining}</b>"
         )
     else:
-        text = "❌ Не удалось определить следующий намаз"
+        text = _("next_prayer_error")
     
     with suppress(TelegramBadRequest):
         await callback.message.edit_text(
             text,
-            reply_markup=schedule_keyboard(is_admin(callback.from_user.id)),
+            reply_markup=schedule_keyboard(is_admin(callback.from_user.id), lang),
             parse_mode="HTML"
         )
     await callback.answer()

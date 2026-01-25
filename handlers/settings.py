@@ -9,6 +9,7 @@ from keyboards.inline import (
     language_keyboard
 )
 from database import get_chat_settings, save_chat_settings
+from locales import get_text
 
 router = Router()
 
@@ -17,7 +18,7 @@ class SettingsStates(StatesGroup):
     waiting_custom_time = State()
 
 
-async def show_settings_message(message: Message):
+async def show_settings_message(message: Message, _: callable, lang: str):
     """Показать настройки как сообщение"""
     settings = await get_chat_settings(message.chat.id)
     
@@ -32,28 +33,28 @@ async def show_settings_message(message: Message):
     show_holidays = settings.get('show_holidays', 1) if settings else 1
     
     style_names = {
-        'standard': 'Стандартные',
-        'crimean_cyrillic': 'Кириллица',
-        'crimean_latin': 'Латиница'
+        'standard': _('prayer_names_standard').split('(')[0].strip(),
+        'crimean_cyrillic': _('prayer_names_cyrillic').split('(')[0].strip(),
+        'crimean_latin': _('prayer_names_latin').split('(')[0].strip()
     }
     
-    day_text = "сегодня" if day == 'today' else "завтра"
-    auto_text = auto_time if auto_time else "отключено"
+    day_text = _("settings_today") if day == 'today' else _("settings_tomorrow")
+    auto_text = auto_time if auto_time else _("settings_disabled")
     
     text = (
-        "⚙️ <b>Настройки</b>\n\n"
-        f"⏰ Рассылка: <b>{auto_text}</b>\n"
-        f"📆 В рассылке: <b>{day_text}</b>\n"
-        f"🔤 Язык: <b>{style_names.get(style, 'Стандартные')}</b>\n"
-        f"🗓 Дата по Хиджре: <b>{'вкл' if show_hijri else 'выкл'}</b>\n"
-        f"🎉 Праздники: <b>{'вкл' if show_holidays else 'выкл'}</b>\n"
+        f"{_('settings_title')}\n\n"
+        f"{_('settings_mailing')} <b>{auto_text}</b>\n"
+        f"{_('settings_mailing_day')} <b>{day_text}</b>\n"
+        f"{_('settings_prayer_style')} <b>{style_names.get(style, style_names['standard'])}</b>\n"
+        f"{_('settings_hijri')} <b>{_('settings_on') if show_hijri else _('settings_off')}</b>\n"
+        f"{_('settings_holidays')} <b>{_('settings_on') if show_holidays else _('settings_off')}</b>\n"
     )
     
-    await message.answer(text, reply_markup=settings_keyboard(), parse_mode="HTML")
+    await message.answer(text, reply_markup=settings_keyboard(lang), parse_mode="HTML")
 
 
 @router.callback_query(F.data == "settings")
-async def show_settings(callback: CallbackQuery):
+async def show_settings(callback: CallbackQuery, _: callable, lang: str):
     """Показать настройки"""
     settings = await get_chat_settings(callback.message.chat.id)
     
@@ -64,26 +65,26 @@ async def show_settings(callback: CallbackQuery):
     show_holidays = settings.get('show_holidays', 1) if settings else 1
     
     style_names = {
-        'standard': 'Стандартные',
-        'crimean_cyrillic': 'Кириллица',
-        'crimean_latin': 'Латиница'
+        'standard': _('prayer_names_standard').split('(')[0].strip(),
+        'crimean_cyrillic': _('prayer_names_cyrillic').split('(')[0].strip(),
+        'crimean_latin': _('prayer_names_latin').split('(')[0].strip()
     }
     
-    day_text = "сегодня" if day == 'today' else "завтра"
-    auto_text = auto_time if auto_time else "отключено"
+    day_text = _("settings_today") if day == 'today' else _("settings_tomorrow")
+    auto_text = auto_time if auto_time else _("settings_disabled")
     
     text = (
-        "⚙️ <b>Настройки</b>\n\n"
-        f"⏰ Рассылка: <b>{auto_text}</b>\n"
-        f"📆 В рассылке: <b>{day_text}</b>\n"
-        f"🔤 Язык: <b>{style_names.get(style, 'Стандартные')}</b>\n"
-        f"🗓 Дата по Хиджре: <b>{'вкл' if show_hijri else 'выкл'}</b>\n"
-        f"🎉 Праздники: <b>{'вкл' if show_holidays else 'выкл'}</b>\n"
+        f"{_('settings_title')}\n\n"
+        f"{_('settings_mailing')} <b>{auto_text}</b>\n"
+        f"{_('settings_mailing_day')} <b>{day_text}</b>\n"
+        f"{_('settings_prayer_style')} <b>{style_names.get(style, style_names['standard'])}</b>\n"
+        f"{_('settings_hijri')} <b>{_('settings_on') if show_hijri else _('settings_off')}</b>\n"
+        f"{_('settings_holidays')} <b>{_('settings_on') if show_holidays else _('settings_off')}</b>\n"
     )
     
     await callback.message.edit_text(
         text,
-        reply_markup=settings_keyboard(),
+        reply_markup=settings_keyboard(lang),
         parse_mode="HTML"
     )
     await callback.answer()
@@ -92,168 +93,161 @@ async def show_settings(callback: CallbackQuery):
 # === Названия намазов ===
 
 @router.callback_query(F.data == "settings_prayer_names")
-async def settings_prayer_names(callback: CallbackQuery):
+async def settings_prayer_names(callback: CallbackQuery, _: callable, lang: str):
     """Настройка названий намазов"""
     settings = await get_chat_settings(callback.message.chat.id)
     current = settings.get('prayer_names_style', 'standard') if settings else 'standard'
     
-    text = (
-        "🔤 <b>Названия намазов</b>\n\n"
-        "Выберите стиль отображения:\n\n"
-        "• <b>Стандартные</b>: Фаджр, Зухр, Аср...\n"
-        "• <b>Кириллица</b>: Имсак, Уйле, Экинди...\n"
-        "• <b>Латиница</b>: İmsak, Üyle, Ekindi..."
-    )
+    text = _("prayer_names_title")
     
     await callback.message.edit_text(
         text,
-        reply_markup=prayer_names_style_keyboard(current),
+        reply_markup=prayer_names_style_keyboard(current, lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("set_prayer_style_"))
-async def set_prayer_style(callback: CallbackQuery):
+async def set_prayer_style(callback: CallbackQuery, _: callable, lang: str):
     """Установка стиля названий"""
     style = callback.data.replace("set_prayer_style_", "")
     await save_chat_settings(callback.message.chat.id, prayer_names_style=style)
-    await callback.answer("✅ Стиль изменён")
-    await settings_prayer_names(callback)
+    await callback.answer(_("style_changed"))
+    await settings_prayer_names(callback, _, lang)
 
 
 # === Настройки хиджри ===
 
 @router.callback_query(F.data == "settings_hijri")
-async def settings_hijri(callback: CallbackQuery):
+async def settings_hijri(callback: CallbackQuery, _: callable, lang: str):
     """Настройки хиджри"""
     settings = await get_chat_settings(callback.message.chat.id)
     show_hijri = bool(settings.get('show_hijri', 1)) if settings else True
     hijri_style = settings.get('hijri_style', 'cyrillic') if settings else 'cyrillic'
     
     text = (
-        "📅 <b>Настройки хиджри</b>\n\n"
-        f"Показывать дату: <b>{'да' if show_hijri else 'нет'}</b>\n"
-        f"Стиль месяцев: <b>{'кириллица' if hijri_style == 'cyrillic' else 'латиница'}</b>\n\n"
-        "Пример:\n"
-        "• Кириллица: 15 Рамазан 1446 х.\n"
-        "• Латиница: 15 Ramazan 1446 х."
+        f"{_('hijri_title')}\n\n"
+        f"{_('hijri_show')} <b>{_('hijri_yes') if show_hijri else _('hijri_no')}</b>\n"
+        f"{_('hijri_style')} <b>{_('hijri_cyrillic') if hijri_style == 'cyrillic' else _('hijri_latin')}</b>\n\n"
+        f"{_('hijri_example')}\n"
+        f"• {_('hijri_cyrillic').capitalize()}: {_('hijri_example_cyr')}\n"
+        f"• {_('hijri_latin').capitalize()}: {_('hijri_example_lat')}"
     )
     
     await callback.message.edit_text(
         text,
-        reply_markup=hijri_settings_keyboard(show_hijri, hijri_style),
+        reply_markup=hijri_settings_keyboard(show_hijri, hijri_style, lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data == "toggle_hijri")
-async def toggle_hijri(callback: CallbackQuery):
+async def toggle_hijri(callback: CallbackQuery, _: callable, lang: str):
     """Переключение отображения хиджри"""
     settings = await get_chat_settings(callback.message.chat.id)
     current = bool(settings.get('show_hijri', 1)) if settings else True
     await save_chat_settings(callback.message.chat.id, show_hijri=0 if current else 1)
-    await callback.answer("✅ Изменено")
-    await settings_hijri(callback)
+    await callback.answer(_("changed"))
+    await settings_hijri(callback, _, lang)
 
 
 @router.callback_query(F.data.startswith("set_hijri_style_"))
-async def set_hijri_style(callback: CallbackQuery):
+async def set_hijri_style(callback: CallbackQuery, _: callable, lang: str):
     """Установка стиля хиджри"""
     style = callback.data.replace("set_hijri_style_", "")
     await save_chat_settings(callback.message.chat.id, hijri_style=style)
-    await callback.answer("✅ Стиль изменён")
-    await settings_hijri(callback)
+    await callback.answer(_("style_changed"))
+    await settings_hijri(callback, _, lang)
 
 
 # === Настройки праздников ===
 
 @router.callback_query(F.data == "settings_holidays")
-async def settings_holidays(callback: CallbackQuery):
+async def settings_holidays(callback: CallbackQuery, _: callable, lang: str):
     """Настройки праздников"""
     settings = await get_chat_settings(callback.message.chat.id)
     show_holidays = bool(settings.get('show_holidays', 1)) if settings else True
     
     text = (
-        "🎉 <b>Настройки праздников</b>\n\n"
-        f"Показывать праздники: <b>{'да' if show_holidays else 'нет'}</b>\n\n"
-        "Когда включено:\n"
-        "• Праздники отображаются в расписании\n"
-        "• Напоминание за день до священной ночи\n"
-        "• Обратный отсчёт до Рамазана"
+        f"{_('holidays_settings_title')}\n\n"
+        f"{_('holidays_show')} <b>{_('hijri_yes') if show_holidays else _('hijri_no')}</b>\n\n"
+        f"{_('holidays_when_enabled')}\n"
+        f"• {_('holidays_feature_1')}\n"
+        f"• {_('holidays_feature_2')}\n"
+        f"• {_('holidays_feature_3')}"
     )
     
     await callback.message.edit_text(
         text,
-        reply_markup=holidays_settings_keyboard(show_holidays),
+        reply_markup=holidays_settings_keyboard(show_holidays, lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data == "toggle_holidays")
-async def toggle_holidays(callback: CallbackQuery):
+async def toggle_holidays(callback: CallbackQuery, _: callable, lang: str):
     """Переключение отображения праздников"""
     settings = await get_chat_settings(callback.message.chat.id)
     current = bool(settings.get('show_holidays', 1)) if settings else True
     await save_chat_settings(callback.message.chat.id, show_holidays=0 if current else 1)
-    await callback.answer("✅ Изменено")
-    await settings_holidays(callback)
+    await callback.answer(_("changed"))
+    await settings_holidays(callback, _, lang)
 
 
 @router.callback_query(F.data == "holidays_list")
-async def holidays_list(callback: CallbackQuery):
+async def holidays_list(callback: CallbackQuery, _: callable, lang: str):
     """Переход к списку праздников"""
     from handlers.start import show_holidays
-    await show_holidays(callback)
+    await show_holidays(callback, _, lang)
 
 
 # === Авто-расписание ===
 
 @router.callback_query(F.data == "settings_auto")
-async def settings_auto(callback: CallbackQuery):
+async def settings_auto(callback: CallbackQuery, _: callable, lang: str):
     """Настройка авто-расписания"""
     settings = await get_chat_settings(callback.message.chat.id)
     current_time = settings.get('daily_schedule_time') if settings else None
     
     text = (
-        "⏰ <b>Ежедневная рассылка</b>\n\n"
-        "Во сколько присылать расписание на день?\n\n"
-        f"Текущее время: <b>{current_time or 'не установлено'}</b>"
+        f"{_('auto_schedule_title')}\n\n"
+        f"{_('auto_current_time')} <b>{current_time or _('auto_not_set')}</b>"
     )
     
     await callback.message.edit_text(
         text,
-        reply_markup=auto_schedule_keyboard(current_time),
+        reply_markup=auto_schedule_keyboard(current_time, lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("set_auto_time_"))
-async def set_auto_time(callback: CallbackQuery, state: FSMContext):
+async def set_auto_time(callback: CallbackQuery, state: FSMContext, _: callable, lang: str):
     """Установка времени авто-расписания"""
     time_value = callback.data.replace("set_auto_time_", "")
     
     if time_value == "custom":
         await callback.message.edit_text(
-            "✏️ Введите время в формате ЧЧ:ММ\n"
-            "Например: 07:30",
+            _("enter_time"),
             parse_mode="HTML"
         )
         await state.set_state(SettingsStates.waiting_custom_time)
+        await state.update_data(lang=lang)
         await callback.answer()
         return
     
     if time_value == "off":
         await save_chat_settings(callback.message.chat.id, daily_schedule_time=None)
-        await callback.answer("✅ Ежедневная рассылка отключена")
+        await callback.answer(_("auto_disabled"))
     else:
         await save_chat_settings(callback.message.chat.id, daily_schedule_time=time_value)
-        await callback.answer(f"✅ Рассылка установлена: {time_value}")
+        await callback.answer(f"{_('auto_set')} {time_value}")
     
-    await settings_auto(callback)
+    await settings_auto(callback, _, lang)
 
 
 @router.message(SettingsStates.waiting_custom_time)
@@ -261,56 +255,56 @@ async def process_custom_time(message: Message, state: FSMContext):
     """Обработка пользовательского времени"""
     import re
     
+    data = await state.get_data()
+    lang = data.get('lang', 'ru')
+    _ = lambda key: get_text(lang, key)
+    
     time_pattern = re.compile(r'^([01]?[0-9]|2[0-3]):([0-5][0-9])$')
     
     if time_pattern.match(message.text):
         await save_chat_settings(message.chat.id, daily_schedule_time=message.text)
         await state.clear()
         await message.answer(
-            f"✅ Время установлено: {message.text}\n\n"
-            "Используйте /start для возврата в главное меню."
+            f"{_('time_set')} {message.text}\n\n"
+            f"{_('use_start_menu')}"
         )
     else:
-        await message.answer(
-            "❌ Неверный формат. Введите время в формате ЧЧ:ММ\n"
-            "Например: 07:30"
-        )
+        await message.answer(_("time_invalid"))
 
 
 # === День расписания ===
 
 @router.callback_query(F.data == "settings_day")
-async def settings_day(callback: CallbackQuery):
+async def settings_day(callback: CallbackQuery, _: callable, lang: str):
     """Настройка дня расписания"""
     settings = await get_chat_settings(callback.message.chat.id)
     current = settings.get('schedule_day', 'today') if settings else 'today'
     
     text = (
-        "📆 <b>День расписания</b>\n\n"
-        "Выберите какой день показывать в ежедневной рассылке:\n\n"
-        f"Текущий выбор: <b>{'расписание на сегодня' if current == 'today' else 'расписание на завтра'}</b>"
+        f"{_('day_title')}\n\n"
+        f"{_('day_current')} <b>{_('day_today_schedule') if current == 'today' else _('day_tomorrow_schedule')}</b>"
     )
     
     await callback.message.edit_text(
         text,
-        reply_markup=schedule_day_keyboard(current),
+        reply_markup=schedule_day_keyboard(current, lang),
         parse_mode="HTML"
     )
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("set_day_"))
-async def set_day(callback: CallbackQuery):
+async def set_day(callback: CallbackQuery, _: callable, lang: str):
     """Установка дня"""
     day = callback.data.replace("set_day_", "")
     await save_chat_settings(callback.message.chat.id, schedule_day=day)
-    await callback.answer(f"✅ Выбран: {'сегодня' if day == 'today' else 'завтра'}")
-    await settings_day(callback)
+    await callback.answer(_("day_set_today") if day == 'today' else _("day_set_tomorrow"))
+    await settings_day(callback, _, lang)
 
 
 # Меню выбора языка
 @router.callback_query(F.data == "settings_language")
-async def show_language_menu(callback: CallbackQuery, _: dict, lang: str):
+async def show_language_menu(callback: CallbackQuery, _: callable, lang: str):
     text = _("language_select")
     await callback.message.edit_text(text, reply_markup=language_keyboard(lang), parse_mode="HTML")
     await callback.answer()
@@ -326,9 +320,6 @@ async def set_language(callback: CallbackQuery):
     # Сохраняем в БД
     await save_chat_settings(callback.message.chat.id, language=new_lang)
     
-    # Опционально: Меняем также стиль названий намазов
-    # Если выбрали латиницу -> ставим crimean_latin
-    # Если кириллицу -> ставим crimean_cyrillic
     prayer_style = "standard"
     if new_lang == "crh_lat":
         prayer_style = "crimean_latin"
@@ -337,21 +328,17 @@ async def set_language(callback: CallbackQuery):
         
     await save_chat_settings(callback.message.chat.id, prayer_names_style=prayer_style)
     
-    # Импортируем get_text вручную, чтобы ответить на НОВОМ языке сразу
-    from locales import get_text
-    
     text = get_text(new_lang, "changed_lang")
     await callback.answer(text)
     
-    # Возвращаем в настройки (уже на новом языке)
-    # Нужно обновить клавиатуру настроек
-    from locales import get_text
+    # Создаём новую функцию перевода для нового языка
+    new_ = lambda key: get_text(new_lang, key)
     
     settings_text = get_text(new_lang, "settings_title")
     
     # Тут нужно обновить функцию settings_keyboard, чтобы она принимала lang
     await callback.message.edit_text(
         settings_text, 
-        reply_markup=settings_keyboard(lang=new_lang), # Предполагается что вы обновили эту функцию
+        reply_markup=settings_keyboard(lang=new_lang),
         parse_mode="HTML"
     )

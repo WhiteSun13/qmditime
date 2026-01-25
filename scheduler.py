@@ -8,6 +8,7 @@ from database import get_chats_with_daily_schedule, get_chats_with_reminders
 from prayer_times import prayer_manager
 from config import TIMEZONE, PRAYER_NAMES_STYLES
 from broadcaster import send_safe_message 
+from locales import get_text
 import logging
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,7 @@ class PrayerScheduler:
     async def process_daily_schedule_sending(self, chat_settings: dict):
         """Подготовка данных и вызов безопасной отправки"""
         chat_id = chat_settings['chat_id']
+        lang = chat_settings.get('language', 'ru')
         
         # Определяем дату
         today = datetime.now(self.tz).date()
@@ -90,7 +92,8 @@ class PrayerScheduler:
             prayer_names_style=chat_settings.get('prayer_names_style', 'standard'),
             show_hijri=bool(chat_settings.get('show_hijri', 1)),
             hijri_style=chat_settings.get('hijri_style', 'cyrillic'),
-            show_holidays=bool(chat_settings.get('show_holidays', 1))
+            show_holidays=bool(chat_settings.get('show_holidays', 1)),
+            lang=lang
         )
         
         # Используем безопасную отправку
@@ -104,9 +107,6 @@ class PrayerScheduler:
         chats = await get_chats_with_reminders()
         
         for chat in chats:
-            # Оборачиваем обработку каждого чата в таск, чтобы долгие вычисления не блокировали цикл
-            # Но для напоминаний лучше делать это последовательно или батчами, 
-            # так как здесь есть логика проверки времени
             await self.process_single_chat_reminder(chat, now, today)
 
     async def process_single_chat_reminder(self, chat: dict, now: datetime, today):
@@ -125,6 +125,7 @@ class PrayerScheduler:
             return
         
         prayer_names_style = chat.get('prayer_names_style', 'standard')
+        lang = chat.get('language', 'ru')
         
         for prayer_key, reminder_minutes in reminders.items():
             prayer_time_str = times.get(prayer_key)
@@ -151,7 +152,8 @@ class PrayerScheduler:
                     prayer_key,
                     prayer_time_str,
                     reminder_minutes,
-                    prayer_names_style
+                    prayer_names_style,
+                    lang
                 )
 
     async def send_reminder_safe(
@@ -160,24 +162,17 @@ class PrayerScheduler:
         prayer_key: str,
         prayer_time: str,
         minutes_before: int,
-        prayer_names_style: str = "standard"
+        prayer_names_style: str = "standard",
+        lang: str = "ru"
     ):
         """Подготовка текста и отправка напоминания"""
         prayer_names = PRAYER_NAMES_STYLES.get(prayer_names_style, PRAYER_NAMES_STYLES["standard"])
         prayer_name = prayer_names[prayer_key]
         
         if prayer_key == "sunrise":
-            text = (
-                f"🔔 <b>Скоро восход солнца!</b>\n\n"
-                f"Через <b>{minutes_before} мин.</b> наступит:\n"
-                f"{prayer_name} — <b>{prayer_time}</b>"
-            )
+            text = get_text(lang, "reminder_sunrise_soon", min=minutes_before, prayer=prayer_name, time=prayer_time)
         else:
-            text = (
-                f"🔔 <b>Скоро намаз!</b>\n\n"
-                f"Через <b>{minutes_before} мин.</b> наступит:\n"
-                f"{prayer_name} — <b>{prayer_time}</b>"
-            )
+            text = get_text(lang, "reminder_prayer_soon", min=minutes_before, prayer=prayer_name, time=prayer_time)
         
         # Используем безопасную отправку
         await send_safe_message(self.bot, chat_id, text)

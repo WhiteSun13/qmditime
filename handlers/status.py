@@ -13,11 +13,7 @@ async def user_unblocked_bot(event: ChatMemberUpdated):
     """
     # Импортируем функцию, которую мы создали в предыдущем шаге
     from database import set_chat_active_status
-    
-    await set_chat_active_status(event.chat.id, True)
-    
-    # Опционально: можно отправить сообщение "С возвращением!"
-    # но лучше не спамить, просто тихо включить рассылку.
+    await set_chat_active_status(event.chat.id, True)    
     print(f"Пользователь {event.chat.id} разблокировал бота. Статус восстановлен.")
 
 # Обработчик события: Пользователь заблокировал бота
