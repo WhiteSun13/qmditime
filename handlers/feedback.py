@@ -27,13 +27,13 @@ async def start_feedback(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 @router.callback_query(F.data == "cancel_feedback")
-async def cancel_feedback(callback: CallbackQuery, state: FSMContext):
+async def cancel_feedback(callback: CallbackQuery, state: FSMContext, _: callable, lang: str):
     """Отмена ввода - возвращает в раздел Помощь"""
     await state.clear()
     
     # Вызываем ту же функцию, что и при нажатии кнопки help
     from handlers.start import show_help
-    await show_help(callback)
+    await show_help(callback, _, lang)
 
 @router.message(FeedbackStates.waiting_message)
 async def process_feedback_message(message: Message, state: FSMContext, bot: Bot):

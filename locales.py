@@ -272,18 +272,18 @@ TEXTS = {
         
         # === Кнопки главного меню ===
         "btn_schedule": "📅 Джедвель",
-        "btn_auto_schedule": "⏰ Куньлик ёллама",
+        "btn_auto_schedule": "⏰ Эр куньки ёллама",
         "btn_reminders": "🔔 Хатырлатмалар",
         "btn_holidays": "🎉 Байрамлар",
         "btn_location": "📍 Ер",
-        "btn_settings": "⚙️ Айярлар",
+        "btn_settings": "⚙️ Сазламалар",
         "btn_help": "❓ Ярдым",
         
         # === Кнопки расписания ===
         "btn_today": "📅 Бугунь",
         "btn_tomorrow": "📅 Ярын",
         "btn_next_prayer": "⏰ Невбеттеки намаз",
-        "btn_select_date": "📆 Тарих сайла",
+        "btn_select_date": "📆 Тарихни сайлама",
         "btn_back": "◀️ Арткъа",
         
         # === Расписание ===
@@ -294,8 +294,8 @@ TEXTS = {
         "next_prayer_time": "🕐 Вакъыт:",
         "next_prayer_remaining": "⏳ Къалды:",
         "next_prayer_error": "❌ Невбеттеки намазны бельгилеп оламадым",
-        "hour_short": "с",
-        "min_short": "дкъ",
+        "hour_short": "саат",
+        "min_short": "дакъкъа",
         "use_navigation": "Тарихлер боюнджа кезмек ичюн кнопкаларны къулланынъыз",
         
         # === Настройки ===
@@ -317,9 +317,9 @@ TEXTS = {
         
         # === Выбор языка ===
         "language_select": "🌐 <b>Тильни сайланъыз / Выберите язык:</b>",
-        "lang_ru": "🇷🇺 Русский",
-        "lang_crh_cyr": "🇺🇦 Къырымтатар (Кирилл)",
-        "lang_crh_lat": "🇺🇦 Qırımtatar (Latin)",
+        "lang_ru": "Русский",
+        "lang_crh_cyr": "Къырымтатар (Кирилл)",
+        "lang_crh_lat": "Qırımtatar (Latin)",
         "changed_lang": "✅ Тиль Къырымтатарджагъа (Кирилл) денъиштирилди",
         
         # === Стили названий ===
@@ -464,7 +464,7 @@ TEXTS = {
         "help_setting_holidays": "• <b>Байрамлар</b> — джедвельде байрамларны косьтерме",
         "help_setting_reminders": "• <b>Хатырлатмалар</b> — намаздан N дакъикъа эвель бильдирюв",
         "help_groups": "<b>Группаларда къулланма:</b>\nБотны группагъа къошунъыз ве айярламакъ ичюн /start язынъыз",
-        "btn_write_developer": "✍️ Иджаткъа язмакъ",
+        "btn_write_developer": "✍️ Кери багъланув",
         
         # === Обратная связь ===
         "feedback_title": "✍️ <b>Герибильдирме</b>\n\nМесажынъызны, суалынъызны я да теклифинъизни язынъыз.\nБиз якъын вакъытта джевап бермеге тырышырмыз.",
@@ -472,8 +472,8 @@ TEXTS = {
         "feedback_sent": "✅ <b>Месаж ёлланды!</b>\nГерибильдирме ичюн сагъ олунъыз.",
         
         # === Уведомления о намазах ===
-        "reminder_prayer_soon": "🔔 <b>Намаз вакъыты якъынлашты!</b>\n\n<b>{min} дкъ.</b> сонъ башлана:\n{prayer} — <b>{time}</b>",
-        "reminder_sunrise_soon": "🔔 <b>Кунеш догъувы якъынлашты!</b>\n\n<b>{min} дкъ.</b> сонъ:\n{prayer} — <b>{time}</b>",
+        "reminder_prayer_soon": "🔔 <b>Намаз вакъыты якъынлашты!</b>\n\n<b>{min} дакъкъа.</b> сонъ башлана:\n{prayer} — <b>{time}</b>",
+        "reminder_sunrise_soon": "🔔 <b>Кунеш догъувы якъынлашты!</b>\n\n<b>{min} дакъкъа.</b> сонъ:\n{prayer} — <b>{time}</b>",
         
         # === Рамазан ===
         "ramadan_before": "🌙 Рамазан башламасына: {days} к.",
@@ -538,35 +538,35 @@ TEXTS = {
         
         # === Кнопки главного меню ===
         "btn_schedule": "📅 Cedvel",
-        "btn_auto_schedule": "⏰ Künlik yollama",
+        "btn_auto_schedule": "⏰ Er künki yollama",
         "btn_reminders": "🔔 Hatırlatmalar",
         "btn_holidays": "🎉 Bayramlar",
         "btn_location": "📍 Yer",
-        "btn_settings": "⚙️ Ayarlar",
+        "btn_settings": "⚙️ Sazlamalar",
         "btn_help": "❓ Yardım",
         
         # === Кнопки расписания ===
         "btn_today": "📅 Bugün",
         "btn_tomorrow": "📅 Yarın",
         "btn_next_prayer": "⏰ Nevbetteki namaz",
-        "btn_select_date": "📆 Tarih sayla",
+        "btn_select_date": "📆 Tarihnı saylamaq",
         "btn_back": "◀️ Artqa",
         
         # === Расписание ===
-        "schedule_title": "📅 <b>Namaz vaqıtları</b>\n\nKünni saylañız:",
+        "schedule_title": "📅 <b>Namaz vaqıtları</b>\n\Bir kün saylañız:",
         "schedule_header": "🕌 <b>Namaz vaqıtları</b>",
         "schedule_not_found": "❌ Bu tarihke cedvel tapılmadı",
         "next_prayer_title": "⏰ <b>Nevbetteki namaz</b>",
         "next_prayer_time": "🕐 Vaqıt:",
         "next_prayer_remaining": "⏳ Qaldı:",
         "next_prayer_error": "❌ Nevbetteki namaznı belgilep olamadım",
-        "hour_short": "s",
-        "min_short": "dq",
+        "hour_short": "saat",
+        "min_short": "daqqa",
         "use_navigation": "Tarihler boyunca kezmek içün knopkalarni qullanıñız",
         
         # === Настройки ===
-        "settings_title": "⚙️ <b>Ayarlar</b>",
-        "btn_prayer_names": "🔤 Adlar tili",
+        "settings_title": "⚙️ <b>Sazlamalar</b>",
+        "btn_prayer_names": "🔤 Namaz adları",
         "btn_hijri": "📅 Hicri tarih",
         "btn_holidays_settings": "🎉 Bayramlar",
         "btn_language": "🌐 Til / Язык",
@@ -575,17 +575,17 @@ TEXTS = {
         "settings_prayer_style": "🔤 Til:",
         "settings_hijri": "🗓 Hicri tarih:",
         "settings_holidays": "🎉 Bayramlar:",
-        "settings_on": "açıq",
-        "settings_off": "qapalı",
+        "settings_on": "qoyulğan",
+        "settings_off": "toqtağan",
         "settings_disabled": "toqtatıldı",
         "settings_today": "bugün",
         "settings_tomorrow": "yarın",
         
         # === Выбор языка ===
         "language_select": "🌐 <b>Tilni saylañız / Выберите язык:</b>",
-        "lang_ru": "🇷🇺 Русский",
-        "lang_crh_cyr": "🇺🇦 Qırımtatar (Kirill)",
-        "lang_crh_lat": "🇺🇦 Qırımtatar (Latin)",
+        "lang_ru": "Русский",
+        "lang_crh_cyr": "Къырымтатар (Кирилл)",
+        "lang_crh_lat": "Qırımtatar (Latin)",
         "changed_lang": "✅ Til Qırımtatarcağa (Latin) deñiştirildi",
         
         # === Стили названий ===
@@ -655,7 +655,7 @@ TEXTS = {
         "reminder_before": "namazdan evel",
         "reminder_select_time": "Qaç daqqa evel hatırlatmaq kerek:",
         "reminder_disabled": "✅ Hatırlatma toqtatıldı",
-        "reminder_set": "✅ {min} dq evel hatırlatma",
+        "reminder_set": "✅ {min} daqqa evel hatırlatma",
         "btn_reset_all": "🔄 Episini sıfırla",
         "all_reminders_reset": "✅ Epsi hatırlatmalar toqtatıldı",
         
@@ -708,7 +708,7 @@ TEXTS = {
         
         # === Смещение по намазам ===
         "prayer_offset_title": "🕌 <b>Namazlar boyunca süyürme</b>",
-        "prayer_offset_desc": "Ayrı süyürme umumiy süyürmege <b>qoşula</b>.\nMisal: umumiy +5 ve İmsak +2 = netice İmsak içün +7 dq.",
+        "prayer_offset_desc": "Ayrı süyürme umumiy süyürmege <b>qoşula</b>.\nMisal: umumiy +5 ve İmsak +2 = netice İmsak içün +7 daqqa.",
         "select_prayer": "Namaz saylañız:",
         "offset_for": "⏱ <b>{prayer} içün süyürme</b>",
         "all_offsets_reset": "✅ Epsi ayrı süyürmeler sıfırlandı",
@@ -730,7 +730,7 @@ TEXTS = {
         "help_setting_holidays": "• <b>Bayramlar</b> — cedvelde bayramlarni kösterme",
         "help_setting_reminders": "• <b>Hatırlatmalar</b> — namazdan N daqqa evel bildirüv",
         "help_groups": "<b>Gruppalarda qullanma:</b>\nBotni gruppağa qoşuñız ve ayarlamaq içün /start yazıñız",
-        "btn_write_developer": "✍️ İcatqa yazmaq",
+        "btn_write_developer": "✍️ Keri bağlanuv",
         
         # === Обратная связь ===
         "feedback_title": "✍️ <b>Geribildirme</b>\n\nMesajıñıznı, sualıñıznı ya da teklifiñizni yazıñız.\nBiz yaqın vaqıtta cevap bermege tırışırmız.",
@@ -738,12 +738,12 @@ TEXTS = {
         "feedback_sent": "✅ <b>Mesaj yollandı!</b>\nGeribildirme içün sağ oluñız.",
         
         # === Уведомления о намазах ===
-        "reminder_prayer_soon": "🔔 <b>Namaz vaqıtı yaqınlaştı!</b>\n\n<b>{min} dq.</b> soñ başlana:\n{prayer} — <b>{time}</b>",
-        "reminder_sunrise_soon": "🔔 <b>Küneş doğuvu yaqınlaştı!</b>\n\n<b>{min} dq.</b> soñ:\n{prayer} — <b>{time}</b>",
+        "reminder_prayer_soon": "🔔 <b>Namaz vaqıtı yaqınlaştı!</b>\n\n<b>{min} daqqa</b> soñ başlana:\n{prayer} — <b>{time}</b>",
+        "reminder_sunrise_soon": "🔔 <b>Küneş doğuvu yaqınlaştı!</b>\n\n<b>{min} daqqa</b> soñ:\n{prayer} — <b>{time}</b>",
         
         # === Рамазан ===
         "ramadan_before": "🌙 Ramazan başlamasına: {days} k.",
-        "ramadan_during": "🌙 Ramazan: {day}-nci kün (qaldı {days_left} k.)",
+        "ramadan_during": "🌙 Ramazan: {day}-nci kün ({days_left} kün qaldı)",
         
         # === Дни недели ===
         "monday": "Bazarertesi",
@@ -786,15 +786,15 @@ TEXTS = {
         "error": "❌ Hata",
         "no_access": "⛔ İriş yoq",
         "changed": "✅ Deñiştirildi",
-        "minutes": "dq",
-        "time_adjusted": "⏱ <i>Vaqıt {offset} dq-ğa tüzetildi.</i>",
+        "minutes": "daqqa",
+        "time_adjusted": "⏱ <i>Vaqıt {offset} daqqağa tüzetildi.</i>",
         "individual_offsets_applied": "<i>Ayrı süyürmeler tetbiq etildi</i>",
         
         # === Ввод даты ===
-        "enter_date_title": "✏️ <b>Tarihni kiriñiz</b>",
-        "enter_date_format": "Format: KK.AA.YYYY\nMisal: 15.03.2025",
-        "enter_date_short": "Ya da: KK.AA (bu yıl)\nMisal: 15.03",
-        "date_invalid": "❌ Yañlış tarih formatı.\n\nTarihni KK.AA.YYYY ya da KK.AA formatında kiriñiz\nMisal: 15.03.2025 ya da 15.03\n\nBekyar etmek içün /schedule yazıñız",
+        "enter_date_title": "✏️ <b>Tarihni yazıñız</b>",
+        "enter_date_format": "Format: KK.AA.YYYY\nMeselâ: 15.03.2026",
+        "enter_date_short": "Ya da: KK.AA (bu yıl)\nMeselâ: 15.03",
+        "date_invalid": "❌ Yañlış tarih formatı.\n\nTarihni KK.AA.YYYY ya da KK.AA formatında kiriñiz\nMeselâ: 15.03.2026 ya da 15.03\n\nLâğu etmek içün /schedule yollañız",
     }
 }
 
