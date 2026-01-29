@@ -91,7 +91,7 @@ class PrayerScheduler:
             show_location=bool(chat_settings.get('show_location', 1)),
             prayer_names_style=chat_settings.get('prayer_names_style', 'standard'),
             show_hijri=bool(chat_settings.get('show_hijri', 1)),
-            hijri_style=chat_settings.get('hijri_style', 'cyrillic'),
+            hijri_style=chat_settings.get('hijri_style', 'translit'),
             show_holidays=bool(chat_settings.get('show_holidays', 1)),
             lang=lang
         )

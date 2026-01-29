@@ -40,8 +40,8 @@ async def init_db():
                 -- Стиль названий намазов: standard, crimean_cyrillic, crimean_latin
                 prayer_names_style TEXT DEFAULT 'standard',
                 
-                -- Стиль хиджри месяцев: cyrillic, latin
-                hijri_style TEXT DEFAULT 'cyrillic',
+                -- Стиль хиджри месяцев: translit, arabic
+                hijri_style TEXT DEFAULT 'translit',
                 
                 -- Показывать ли дату хиджри
                 show_hijri INTEGER DEFAULT 1,
@@ -70,7 +70,7 @@ async def init_db():
         except:
             pass
         try:
-            await db.execute("ALTER TABLE chat_settings ADD COLUMN hijri_style TEXT DEFAULT 'cyrillic'")
+            await db.execute("ALTER TABLE chat_settings ADD COLUMN hijri_style TEXT DEFAULT 'translit'")
         except:
             pass
         try:

@@ -52,7 +52,7 @@ async def get_schedule_text(chat_id: int, target_date: date, lang: str) -> str:
         show_location=bool(settings.get('show_location', 1)),
         prayer_names_style=settings.get('prayer_names_style', 'standard'),
         show_hijri=bool(settings.get('show_hijri', 1)),
-        hijri_style=settings.get('hijri_style', 'cyrillic'),
+        hijri_style=settings.get('hijri_style', 'translit'),
         show_holidays=bool(settings.get('show_holidays', 1)),
         lang=lang
     )

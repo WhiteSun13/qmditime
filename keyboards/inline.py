@@ -130,7 +130,7 @@ def prayer_names_style_keyboard(current: str = "standard", lang: str = "ru") -> 
     return builder.as_markup()
 
 
-def hijri_settings_keyboard(show_hijri: bool = True, style: str = "cyrillic", lang: str = "ru") -> InlineKeyboardMarkup:
+def hijri_settings_keyboard(show_hijri: bool = True, style: str = "translit", lang: str = "ru") -> InlineKeyboardMarkup:
     """Настройки хиджри"""
     _ = lambda key: get_text(lang, key)
     builder = InlineKeyboardBuilder()
@@ -140,14 +140,15 @@ def hijri_settings_keyboard(show_hijri: bool = True, style: str = "cyrillic", la
         InlineKeyboardButton(text=show_text, callback_data="toggle_hijri")
     )
     
+    # Арабский или Транслит
     builder.row(
         InlineKeyboardButton(
-            text=f"{'✅' if style == 'cyrillic' else '⬜'} {_('btn_cyrillic')}",
-            callback_data="set_hijri_style_cyrillic"
+            text=f"{'✅' if style == 'arabic' else '⬜'} {_('btn_arabic')}",
+            callback_data="set_hijri_style_arabic"
         ),
         InlineKeyboardButton(
-            text=f"{'✅' if style == 'latin' else '⬜'} {_('btn_latin')}",
-            callback_data="set_hijri_style_latin"
+            text=f"{'✅' if style == 'translit' else '⬜'} {_('btn_translit')}",
+            callback_data="set_hijri_style_translit"
         )
     )
     

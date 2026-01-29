@@ -9,6 +9,24 @@ from config import (
 )
 from locales import get_text, get_weekday, get_month
 
+# Карта начал месяцев Хиджры для 2026 года по календарю ДУМК
+# Ключ: Дата григорианского календаря (начало месяца)
+# Значение: (Месяц Хиджры, Год Хиджры)
+HIJRI_2026_MAP = {
+    date(2025, 12, 21): (7, 1447),   # Реджеб
+    date(2026, 1, 20):  (8, 1447),   # Шабан
+    date(2026, 2, 19):  (9, 1447),   # Рамазан
+    date(2026, 3, 20):  (10, 1447),  # Шевваль
+    date(2026, 4, 19):  (11, 1447),  # Зилькаде
+    date(2026, 5, 18):  (12, 1447),  # Зильхидждже
+    date(2026, 6, 16):  (1, 1448),   # Мухаррем (Новый год)
+    date(2026, 7, 16):  (2, 1448),   # Сефер
+    date(2026, 8, 14):  (3, 1448),   # Ребиуль-эвель
+    date(2026, 9, 13):  (4, 1448),   # Ребиуль-ахыр
+    date(2026, 10, 12): (5, 1448),   # Джумазиель-эвель
+    date(2026, 11, 11): (6, 1448),   # Джумазиель-ахыр
+    date(2026, 12, 10): (7, 1448),   # Реджеб
+}
 
 class PrayerTimesManager:
     def __init__(self):
@@ -59,20 +77,62 @@ class PrayerTimesManager:
         
         return adjusted
     
-    def get_hijri_date(self, gregorian_date: date) -> tuple:
-        """Получить дату по хиджри"""
+    def _get_hijri_date_algo(self, gregorian_date: date) -> tuple:
+        """Старый метод (алгоритмический расчет)"""
         hijri = Gregorian(
             gregorian_date.year,
             gregorian_date.month,
             gregorian_date.day
         ).to_hijri()
         return hijri.day, hijri.month, hijri.year
+
+    def get_hijri_date(self, gregorian_date: date) -> tuple:
+        """Получить дату по хиджри (сначала пробуем карту 2026, потом алгоритм)"""
+        
+        # Пытаемся найти в карте
+        if gregorian_date.year == 2026 or (gregorian_date.year == 2025 and gregorian_date.month == 12):
+            # Сортируем даты начала месяцев в обратном порядке
+            sorted_starts = sorted(HIJRI_2026_MAP.keys(), reverse=True)
+            
+            for start_date in sorted_starts:
+                if gregorian_date >= start_date:
+                    h_month, h_year = HIJRI_2026_MAP[start_date]
+                    # Разница в днях + 1 (так как первый день это 1-е число)
+                    h_day = (gregorian_date - start_date).days + 1
+                    return h_day, h_month, h_year
+
+        # Если даты нет в карте, используем старую функцию
+        return self._get_hijri_date_algo(gregorian_date)
+
+    def _to_arabic_numerals(self, number: int) -> str:
+        """Преобразование чисел в восточно-арабские цифры (٠-٩)"""
+        table = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
+        return str(number).translate(table)
     
-    def format_hijri_date(self, gregorian_date: date, style: str = "cyrillic") -> str:
+    def format_hijri_date(self, gregorian_date: date, style: str = "translit", lang: str = "ru") -> str:
         """Форматировать дату хиджри"""
         day, month, year = self.get_hijri_date(gregorian_date)
-        months = HIJRI_MONTHS.get(style, HIJRI_MONTHS["cyrillic"])
+        
+        # Определяем реальный стиль месяцев
+        if style == "arabic":
+            month_style = "arabic"
+        else:
+            # Транслит - определяем по языку
+            if lang == "crh_lat":
+                month_style = "latin"
+            else:
+                # ru, crh_cyr -> кириллица
+                month_style = "cyrillic"
+        
+        months = HIJRI_MONTHS.get(month_style, HIJRI_MONTHS["cyrillic"])
         month_name = months[month] if month < len(months) else months[0]
+        
+        # ЕСЛИ стиль арабский - конвертируем цифры
+        if style == "arabic":
+            day_str = self._to_arabic_numerals(day)
+            year_str = self._to_arabic_numerals(year)
+            return f"{day_str} {month_name} {year_str}"
+            
         return f"{day} {month_name} {year} х."
     
     def get_holiday(self, target_date: date) -> Optional[Dict]:
@@ -123,7 +183,7 @@ class PrayerTimesManager:
         show_location: bool = True,
         prayer_names_style: str = "standard",
         show_hijri: bool = True,
-        hijri_style: str = "cyrillic",
+        hijri_style: str = "translit",
         show_holidays: bool = True,
         lang: str = "ru"
     ) -> str:
@@ -152,8 +212,9 @@ class PrayerTimesManager:
         
         # Хиджри дата
         if show_hijri:
-            hijri_str = self.format_hijri_date(target_date, hijri_style)
-            text += f"🗓 {hijri_str}\n"
+            hijri_str = self.format_hijri_date(target_date, hijri_style, lang)
+            # Добавляем \u200e для выравнивания
+            text += f"🗓 \u200e{hijri_str}\n"
         
         text += "━" * 20 + "\n"
         
@@ -218,7 +279,7 @@ class PrayerTimesManager:
                 text += get_text(lang, "individual_offsets_applied")
         
         return text
-    
+
     def get_next_prayer(
         self,
         general_offset: int = 0,

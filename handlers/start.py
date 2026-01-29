@@ -64,7 +64,6 @@ async def show_help(callback: CallbackQuery, _: callable, lang: str):
         f"{_('help_settings_title')}\n"
         f"{_('help_setting_mailing')}\n"
         f"{_('help_setting_offset')}\n"
-        f"{_('help_setting_names')}\n"
         f"{_('help_setting_hijri')}\n"
         f"{_('help_setting_holidays')}\n"
         f"{_('help_setting_reminders')}\n\n"
@@ -181,7 +180,7 @@ async def cmd_schedule(message: Message, _: callable, lang: str):
         show_location=bool(settings.get('show_location', 1)),
         prayer_names_style=settings.get('prayer_names_style', 'standard'),
         show_hijri=bool(settings.get('show_hijri', 1)),
-        hijri_style=settings.get('hijri_style', 'cyrillic'),
+        hijri_style=settings.get('hijri_style', 'translit'),
         show_holidays=bool(settings.get('show_holidays', 1)),
         lang=lang
     )
@@ -213,7 +212,7 @@ async def cmd_tomorrow(message: Message, _: callable, lang: str):
         show_location=bool(settings.get('show_location', 1)),
         prayer_names_style=settings.get('prayer_names_style', 'standard'),
         show_hijri=bool(settings.get('show_hijri', 1)),
-        hijri_style=settings.get('hijri_style', 'cyrillic'),
+        hijri_style=settings.get('hijri_style', 'translit'),
         show_holidays=bool(settings.get('show_holidays', 1)),
         lang=lang
     )

@@ -124,16 +124,33 @@ async def settings_hijri(callback: CallbackQuery, _: callable, lang: str):
     """Настройки хиджри"""
     settings = await get_chat_settings(callback.message.chat.id)
     show_hijri = bool(settings.get('show_hijri', 1)) if settings else True
-    hijri_style = settings.get('hijri_style', 'cyrillic') if settings else 'cyrillic'
+    hijri_style = settings.get('hijri_style', 'translit') if settings else 'translit'
+    
+    # Определяем какой транслит будет использоваться
+    if hijri_style == 'translit':
+        if lang == 'crh_lat':
+            translit_type = _('hijri_latin')
+        else:
+            translit_type = _('hijri_cyrillic')
+        style_display = f"{_('hijri_translit')} ({translit_type})"
+    else:
+        style_display = _('hijri_arabic')
+    
+    # Пример в зависимости от стиля
+    if hijri_style == 'arabic':
+        example = _('hijri_example_arabic')
+    else:
+        example = _('hijri_example_translit')
     
     text = (
         f"{_('hijri_title')}\n\n"
         f"{_('hijri_show')} <b>{_('hijri_yes') if show_hijri else _('hijri_no')}</b>\n"
-        f"{_('hijri_style')} <b>{_('hijri_cyrillic') if hijri_style == 'cyrillic' else _('hijri_latin')}</b>\n\n"
-        f"{_('hijri_example')}\n"
-        f"• {_('hijri_cyrillic').capitalize()}: {_('hijri_example_cyr')}\n"
-        f"• {_('hijri_latin').capitalize()}: {_('hijri_example_lat')}"
+        f"{_('hijri_style')} <b>{style_display}</b>\n\n"
+        f"{_('hijri_example')} {example}"
     )
+    
+    if hijri_style == 'translit':
+        text += f"\n\n<i>ℹ️ {_('hijri_translit_auto')}</i>"
     
     await callback.message.edit_text(
         text,
@@ -155,7 +172,7 @@ async def toggle_hijri(callback: CallbackQuery, _: callable, lang: str):
 
 @router.callback_query(F.data.startswith("set_hijri_style_"))
 async def set_hijri_style(callback: CallbackQuery, _: callable, lang: str):
-    """Установка стиля хиджри"""
+    """Установка стиля хиджри (arabic или translit)"""
     style = callback.data.replace("set_hijri_style_", "")
     await save_chat_settings(callback.message.chat.id, hijri_style=style)
     await callback.answer(_("style_changed"))
