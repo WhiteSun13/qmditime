@@ -149,8 +149,8 @@ async def settings_hijri(callback: CallbackQuery, _: callable, lang: str):
         f"{_('hijri_example')} {example}"
     )
     
-    if hijri_style == 'translit':
-        text += f"\n\n<i>ℹ️ {_('hijri_translit_auto')}</i>"
+    # if hijri_style == 'translit':
+    #     text += f"\n\n<i>ℹ️ {_('hijri_translit_auto')}</i>"
     
     await callback.message.edit_text(
         text,
