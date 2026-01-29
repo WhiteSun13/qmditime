@@ -133,7 +133,7 @@ class PrayerTimesManager:
             year_str = self._to_arabic_numerals(year)
             return f"{day_str} {month_name} {year_str}"
             
-        return f"{day} {month_name} {year} х."
+        return f"{day} {month_name} {year}"
     
     def get_holiday(self, target_date: date) -> Optional[Dict]:
         """Получить праздник на дату"""
