@@ -185,7 +185,7 @@ def auto_schedule_keyboard(current_time: str = None, lang: str = "ru") -> Inline
     _ = lambda key: get_text(lang, key)
     builder = InlineKeyboardBuilder()
     
-    times = ["06:00", "07:00", "08:00", "09:00", "20:00", "21:00"]
+    times = ["06:00", "07:00", "08:00", "19:00", "20:00", "21:00"]
     
     for i in range(0, len(times), 3):
         row_times = times[i:i+3]
