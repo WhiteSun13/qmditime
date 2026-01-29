@@ -334,7 +334,7 @@ async def set_language(callback: CallbackQuery):
     # Поэтому берем новый код языка
     new_lang = callback.data.replace("set_lang_", "")
     
-    # Сохраняем в БД
+    # Сохраняем настройки в БД
     await save_chat_settings(callback.message.chat.id, language=new_lang)
     
     prayer_style = "standard"
@@ -345,17 +345,14 @@ async def set_language(callback: CallbackQuery):
         
     await save_chat_settings(callback.message.chat.id, prayer_names_style=prayer_style)
     
+    # Отправляем всплывающее уведомление на новом языке
     text = get_text(new_lang, "changed_lang")
     await callback.answer(text)
     
-    # Создаём новую функцию перевода для нового языка
+    # Создаём функцию перевода для НОВОГО языка
     new_ = lambda key: get_text(new_lang, key)
     
-    settings_text = get_text(new_lang, "settings_title")
-    
-    # Тут нужно обновить функцию settings_keyboard, чтобы она принимала lang
-    await callback.message.edit_text(
-        settings_text, 
-        reply_markup=settings_keyboard(lang=new_lang),
-        parse_mode="HTML"
-    )
+    # ВАЖНО: Вызываем функцию show_settings, передавая ей новые параметры.
+    # Она сама достанет все настройки из БД (которые мы только что обновили)
+    # и сформирует полный текст меню на нужном языке.
+    await show_settings(callback, new_, new_lang)
