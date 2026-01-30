@@ -254,7 +254,7 @@ async def cmd_next(message: Message, _: callable, lang: str):
         
         diff = prayer_datetime - now
         hours, remainder = divmod(int(diff.total_seconds()), 3600)
-        minutes, _ = divmod(remainder, 60)
+        minutes, secs = divmod(remainder, 60)
         
         if hours > 0:
             remaining = f"{hours} {_('hour_short')} {minutes} {_('min_short')}"
